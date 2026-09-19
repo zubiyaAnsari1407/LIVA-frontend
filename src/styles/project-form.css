@@ -1,0 +1,150 @@
+.pf-primary,
+.pf-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 15px;
+  border: 1px solid #d8e1d2;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pf-primary {
+  background: #193f36;
+  color: #fff !important;
+}
+
+.pf-secondary {
+  background: #fff;
+  color: #203d32;
+}
+
+.pf-primary:hover:not(:disabled) { background: #31573f; }
+
+.pf-dialog {
+  box-sizing: border-box;
+  width: min(620px, calc(100% - 28px));
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid #d8e1d2;
+  border-radius: 12px;
+  background: #fbfcf8;
+  color: #203d32;
+  box-shadow: 0 24px 80px #102b2440;
+}
+
+.pf-dialog * { box-sizing: border-box; }
+.pf-dialog::backdrop { background: #102b2466; backdrop-filter: blur(3px); }
+
+.pf-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 22px;
+  border-bottom: 1px solid #d8e1d2;
+  background: #edf2e5;
+}
+
+.pf-heading small { color: #776738; font-size: 10px; letter-spacing: 1.4px; }
+.pf-heading h2 { margin: 7px 0 0; font-size: 24px; }
+
+.pf-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d8e1d2;
+  border-radius: 5px;
+  background: white;
+  color: #193f36;
+  cursor: pointer;
+}
+
+.pf-form { padding: 22px; }
+.pf-form fieldset { display: grid; gap: 17px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
+.pf-form label { display: grid; gap: 8px; font-size: 12px; font-weight: 600; }
+
+.pf-form :is(input, select, textarea) {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #d8e1d2;
+  border-radius: 6px;
+  background: white;
+  color: #203d32;
+  font: inherit;
+  font-weight: 400;
+}
+
+.pf-form textarea { resize: vertical; }
+.pf-note { margin: 0; color: #596d51; font-size: 11px; line-height: 1.7; }
+.pf-error { padding: 12px; border-radius: 6px; background: #f5ecd8; color: #715522; font-size: 12px; line-height: 1.7; }
+.pf-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 22px; }
+
+.pf-dialog :disabled,
+.pf-primary:disabled,
+.pf-secondary:disabled { opacity: .6; cursor: not-allowed; }
+
+.pf-dialog :is(input, select, textarea, button):focus-visible,
+.pf-primary:focus-visible {
+  outline: 2px solid #b9944c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 550px) {
+  .pf-grid { grid-template-columns: 1fr; }
+}
+
+dialog.pf-dialog .pf-heading {
+  background: #edf2e5;
+  color: #193f36;
+}
+
+dialog.pf-dialog .pf-heading h2 {
+  color: #193f36 !important;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+dialog.pf-dialog .pf-heading small {
+  color: #776738 !important;
+}
+
+dialog.pf-dialog .pf-close {
+  background: #ffffff;
+  color: #193f36 !important;
+  border-color: #d8e1d2;
+}
+
+dialog.pf-dialog .pf-heading {
+  background: #193f36;
+  color: #ffffff;
+  border-bottom: 2px solid #b9944c;
+}
+
+dialog.pf-dialog .pf-heading h2 {
+  color: #ffffff !important;
+}
+
+dialog.pf-dialog .pf-heading small {
+  color: #dfc68d !important;
+}
+
+dialog.pf-dialog .pf-close {
+  background: transparent;
+  color: #ffffff !important;
+  border: 1px solid #ffffff55;
+}
+
+dialog.pf-dialog .pf-close:hover {
+  background: #ffffff15;
+}

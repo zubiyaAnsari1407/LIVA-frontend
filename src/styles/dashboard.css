@@ -1,0 +1,2040 @@
+/* LIVA — approved portal-inspired dashboard */
+.enterprise-dashboard {
+  --ed-green: #193f36;
+  --ed-green-dark: #14372f;
+  --ed-text: #1e3e35;
+  --ed-muted: #66786f;
+  --ed-border: #d7dfd8;
+  --ed-gold: #b58c3c;
+
+  min-height: 100vh;
+  color: var(--ed-text);
+  background: #f5f7f3;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.enterprise-dashboard h1,
+.enterprise-dashboard h2,
+.enterprise-dashboard h3,
+.enterprise-dashboard p {
+  margin: 0;
+}
+
+.enterprise-dashboard button {
+  cursor: pointer;
+}
+
+.enterprise-dashboard svg {
+  flex-shrink: 0;
+}
+
+.enterprise-dashboard [id] {
+  scroll-margin-top: 20px;
+}
+
+.enterprise-dashboard :focus-visible {
+  outline: 3px solid #bb964b;
+  outline-offset: 4px;
+}
+
+.dashboard-skip {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  z-index: 3000;
+  transform: translateY(-150%);
+  padding: 10px 15px;
+  background: white;
+  color: var(--ed-green);
+}
+
+.dashboard-skip:focus {
+  transform: none;
+}
+
+/* Header */
+.enterprise-header {
+  position: relative;
+  z-index: 1001;
+  background: var(--ed-green-dark);
+  color: #fff;
+}
+
+.enterprise-header-inner {
+  width: min(1760px, calc(100% - 48px));
+  min-height: 76px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.enterprise-brand {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.enterprise-logo-window {
+  display: block;
+  width: 110px;
+  height: 43px;
+  overflow: hidden;
+  position: relative;
+}
+
+.enterprise-logo-window img {
+  position: absolute;
+  width: 162px;
+  max-width: none;
+  left: -27px;
+  top: 50%;
+  transform: translateY(-50%);
+  filter: brightness(0) invert(1);
+}
+
+.enterprise-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.enterprise-nav > a,
+.enterprise-nav > button,
+.enterprise-nav summary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 11px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #f5f7f1;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.enterprise-nav > a:hover,
+.enterprise-nav > button:hover,
+.enterprise-nav summary:hover {
+  background: #ffffff0d;
+}
+
+.enterprise-nav-active::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: 2px;
+  height: 2px;
+  background: #d2b66f;
+}
+
+.enterprise-nav details {
+  position: relative;
+}
+
+.enterprise-nav summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.enterprise-nav summary::-webkit-details-marker {
+  display: none;
+}
+
+.enterprise-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 225px;
+  padding: 7px;
+  border: 1px solid var(--ed-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 35px #14372f20;
+}
+
+.enterprise-dropdown button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  padding: 11px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ed-text);
+  font-size: 12px;
+  text-align: left;
+}
+
+.enterprise-dropdown button:hover {
+  background: #edf2e9;
+}
+
+.enterprise-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.enterprise-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border: 1px solid #b7c7bc70;
+  border-radius: 8px;
+  background: #ffffff05;
+  color: #dae4dd;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.enterprise-icon-button,
+.enterprise-mobile-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 36px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #edf4ec;
+}
+
+.enterprise-profile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #d5e1da;
+  color: var(--ed-green);
+}
+
+.enterprise-mobile-toggle {
+  display: none;
+}
+
+.enterprise-mobile-menu[hidden] {
+  display: none;
+}
+
+.enterprise-mobile-menu {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 10px 20px 20px;
+  border-top: 1px solid #ffffff20;
+}
+
+.enterprise-mobile-menu a,
+.enterprise-mobile-menu button {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 10px;
+  background: transparent;
+  color: white;
+  font-size: 13px;
+  text-align: left;
+}
+
+.mobile-nav-group > span {
+  display: block;
+  padding: 13px 10px 3px;
+  color: #b5c8bc;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* =========================================================
+   LANDSCAPE BANNER
+   ========================================================= */
+
+.enterprise-banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 270px;
+
+  margin-top: 12px;
+
+  background: #e9eee3;
+}
+
+
+/* Background image + overlay */
+
+.enterprise-banner-image,
+.enterprise-banner-shade {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+}
+
+.enterprise-banner-image {
+  z-index: -2;
+
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.enterprise-banner-shade {
+  z-index: -1;
+
+  background: linear-gradient(
+    90deg,
+    rgba(242, 244, 238, 0.98) 0%,
+    rgba(242, 244, 238, 0.96) 25%,
+    rgba(242, 244, 238, 0.80) 40%,
+    rgba(242, 244, 238, 0.26) 66%,
+    rgba(242, 244, 238, 0) 85%
+  );
+}
+
+
+/* Banner content */
+
+.enterprise-banner-content {
+  position: relative;
+
+  width: min(650px, 62%);
+  max-width: 650px;
+
+  margin: 34px 0 34px 4%;
+  padding-left: 24px;
+}
+
+.enterprise-banner-content::before {
+  content: "";
+
+  position: absolute;
+
+  top: 1px;
+  left: 0;
+  bottom: 48px;
+
+  width: 3px;
+
+  border-radius: 999px;
+
+  background: #c29b49;
+}
+
+
+/* Eyebrow */
+
+.enterprise-eyebrow {
+  margin: 0;
+
+  color: #173f35;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+
+/* Main heading */
+
+.enterprise-banner h1 {
+  margin: 7px 0 0;
+
+  color: #123d34;
+
+  font-size: clamp(30px, 2.65vw, 42px);
+  font-weight: 650;
+
+  line-height: 1.08;
+  letter-spacing: -1px;
+}
+
+
+/* Description */
+
+.enterprise-banner-description {
+  max-width: 500px;
+
+  margin-top: 12px !important;
+  margin-bottom: 0;
+
+  color: #38554b;
+
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+
+/* Buttons */
+
+.enterprise-button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  min-height: 40px;
+
+  padding: 10px 21px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.enterprise-button-green {
+  background: var(--ed-green);
+  color: #ffffff;
+
+  box-shadow: 0 7px 20px rgba(23, 63, 53, 0.14);
+}
+
+.enterprise-button-green:hover {
+  transform: translateY(-1px);
+
+  background: #214f43;
+
+  box-shadow: 0 10px 25px rgba(23, 63, 53, 0.2);
+}
+
+.enterprise-banner-content .enterprise-button {
+  margin-top: 18px;
+}
+
+
+/* Right quote */
+
+.enterprise-banner-quote {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  align-self: stretch;
+
+  width: 215px;
+  flex-shrink: 0;
+
+  margin-left: auto;
+
+  padding: 30px 27px;
+
+  border-radius: 68% 0 0 42%;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(24, 67, 56, 0.98),
+      rgba(16, 55, 47, 0.96)
+    );
+
+  color: #f6f4e8;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 25px;
+  font-style: italic;
+
+  line-height: 1.08;
+
+  box-shadow: -12px 0 35px rgba(18, 61, 52, 0.08);
+}
+
+
+/* =========================================================
+   CONTENT AND METRICS
+   ========================================================= */
+
+.enterprise-content {
+  width: min(
+    1760px,
+    calc(100% - 48px)
+  );
+
+  margin-inline: auto;
+
+  padding-top: 22px;
+}
+
+
+/* Metric grid */
+
+.enterprise-metrics {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 14px;
+
+  margin-bottom: 14px;
+}
+
+
+/* Metric card */
+
+.enterprise-metric {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 17px;
+
+  overflow: hidden;
+
+  min-height: 100px;
+
+  padding: 16px 18px;
+
+  border: 1px solid var(--ed-border);
+  border-radius: 12px;
+
+  background: #fafcf9;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.enterprise-metric:hover {
+  transform: translateY(-2px);
+
+  border-color: #ccd8cf;
+
+  box-shadow:
+    0 10px 28px
+    rgba(23, 63, 53, 0.07);
+}
+
+.enterprise-metric > div {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* Metric icon */
+
+.enterprise-metric-icon {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 54px;
+  height: 54px;
+
+  border-radius: 16px;
+
+  background: #3f6d58;
+
+  color: #ffffff;
+
+  box-shadow:
+    0 8px 20px
+    rgba(36, 87, 68, 0.16);
+}
+
+
+/* Metric text */
+
+.enterprise-metric h2 {
+  margin: 0;
+
+  color: inherit;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  letter-spacing: 0.01em;
+}
+
+.enterprise-metric strong {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 26px;
+  font-weight: 650;
+
+  line-height: 1.15;
+
+  letter-spacing: -0.5px;
+}
+
+.enterprise-metric p {
+  margin-top: 4px;
+  margin-bottom: 0;
+
+  color: var(--ed-muted);
+
+  font-size: 10px;
+
+  line-height: 1.4;
+}
+
+
+/* Decorative watermark */
+
+.enterprise-metric-watermark {
+  position: absolute;
+
+  right: 8px;
+  bottom: 5px;
+
+  color: #4a704f;
+
+  opacity: 0.055;
+}
+
+
+/* =========================================================
+   BLUE METRIC
+   ========================================================= */
+
+.enterprise-metric.metric-blue {
+  background: #f5f9fa;
+
+  border-color: #dce7ea;
+
+  color: #2d5665;
+}
+
+.metric-blue .enterprise-metric-icon {
+  background: #32667a;
+}
+
+.metric-blue .enterprise-metric-watermark {
+  color: #32667a;
+}
+
+
+/* =========================================================
+   GOLD METRIC
+   ========================================================= */
+
+.enterprise-metric.metric-gold {
+  background: #fbf8f0;
+
+  border-color: #e7ddc9;
+
+  color: #886222;
+}
+
+.metric-gold .enterprise-metric-icon {
+  background: #a77b31;
+}
+
+.metric-gold .enterprise-metric-watermark {
+  color: #b78a3c;
+}
+
+
+/* =========================================================
+   PURPLE METRIC
+   ========================================================= */
+
+.enterprise-metric.metric-purple {
+  background: #f8f6fa;
+
+  border-color: #e5deea;
+
+  color: #56446e;
+}
+
+.metric-purple .enterprise-metric-icon {
+  background: #615078;
+}
+
+.metric-purple .enterprise-metric-watermark {
+  color: #615078;
+}
+
+/* Map + Project Lens */
+.enterprise-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.45fr) minmax(300px, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.enterprise-workspace-grid.lens-is-collapsed {
+  grid-template-columns: 1fr;
+}
+
+.enterprise-map-column {
+  min-width: 0;
+}
+
+.enterprise-dashboard .gis-workspace {
+  overflow: hidden;
+  border: 1px solid var(--ed-green);
+  border-radius: 6px;
+  background: var(--ed-green);
+}
+
+.enterprise-dashboard .gis-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 39px;
+  padding: 8px 14px;
+  color: white;
+}
+
+.enterprise-dashboard .gis-toolbar h2 {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.enterprise-dashboard .gis-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.enterprise-dashboard .basemap-label {
+  font-size: 10px;
+  color: #d9e6dc;
+}
+
+.enterprise-dashboard .gis-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #ffffff50;
+  border-radius: 5px;
+  background: transparent;
+  color: white;
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+.enterprise-dashboard .gis-map-wrapper {
+  position: relative;
+}
+
+.enterprise-dashboard .gis-map-container {
+  width: 100%;
+  height: 390px;
+  background: #dbe5d7;
+}
+
+.enterprise-dashboard .gis-status {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  z-index: 2;
+  max-width: calc(100% - 75px);
+  padding: 9px 12px;
+  border-radius: 5px;
+  background: white;
+  color: var(--ed-text);
+  font-size: 11px;
+  box-shadow: 0 3px 14px #193f3620;
+}
+
+.enterprise-dashboard .gis-records-note {
+  position: absolute;
+  bottom: 49px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 25px);
+  padding: 8px 11px;
+  border-radius: 5px;
+  background: #fffffff0;
+  color: var(--ed-text);
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.enterprise-lens-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ed-muted);
+  font-size: 10px;
+}
+
+.enterprise-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--ed-border);
+  border-radius: 6px;
+  background: #ffffff85;
+}
+
+.enterprise-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  padding: 10px 13px;
+}
+
+.enterprise-panel-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.enterprise-small-icon {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ed-muted);
+}
+
+.enterprise-lens[hidden] {
+  display: none;
+}
+
+.enterprise-lens-body {
+  padding: 0 12px 12px;
+}
+
+.enterprise-project-photo {
+  position: relative;
+  overflow: hidden;
+  height: 135px;
+  border-radius: 5px;
+  background: #d9e2d2;
+}
+
+.enterprise-project-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.enterprise-project-photo > span {
+  position: absolute;
+  bottom: 7px;
+  left: 7px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: #fffffff0;
+  color: #3c5e42;
+  font-size: 8px;
+}
+
+.enterprise-lens-body h3 {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.enterprise-lens-description {
+  margin-top: 5px !important;
+  color: var(--ed-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.enterprise-project-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 17px;
+}
+
+.enterprise-project-facts > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 12px 5px;
+  border-top: 1px solid #e1e6df;
+}
+
+.enterprise-project-facts span {
+  font-size: 8px;
+  line-height: 1.4;
+  color: var(--ed-muted);
+}
+
+.enterprise-project-facts strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ed-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.enterprise-project-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  margin-top: 8px;
+  padding: 6px;
+  border: 0;
+  border-radius: 5px;
+  background: #3e5f47;
+  color: white;
+  font-size: 10px;
+}
+
+/* Journey, activities, quick links */
+.enterprise-lower-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  gap: 14px;
+  margin-top: 13px;
+}
+
+.enterprise-journey-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 18px 17px 24px;
+}
+
+.enterprise-journey-steps li {
+  position: relative;
+  text-align: center;
+}
+
+.enterprise-journey-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: calc(50% + 28px);
+  width: calc(100% - 49px);
+  border-top: 1px dashed #b5c4b7;
+}
+
+.enterprise-stage-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #c5d2c5;
+  border-radius: 50%;
+  background: #edf2ea;
+  color: #496b50;
+  box-shadow: 0 0 0 3px #f7f9f5;
+}
+
+.enterprise-journey-steps h3 {
+  margin-top: 12px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.enterprise-journey-steps p {
+  margin-top: 5px;
+  color: var(--ed-muted);
+  font-size: 9px;
+}
+
+.enterprise-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  color: var(--ed-muted);
+  font-size: 10px;
+}
+
+.enterprise-activity-empty {
+  padding: 14px 20px 24px;
+}
+
+.enterprise-activity-empty > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: #ecf1e7;
+  color: #688068;
+}
+
+.enterprise-activity-empty h3 {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.enterprise-activity-empty p {
+  max-width: 310px;
+  margin-top: 7px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--ed-muted);
+}
+
+.enterprise-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 5px 12px 12px;
+}
+
+.enterprise-quick-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 65px;
+  padding: 8px 5px;
+  border: 1px solid #e0e6dc;
+  border-radius: 5px;
+  background: #ffffff65;
+  color: var(--ed-text);
+  font-size: 9px;
+}
+
+/* Image service cards */
+.enterprise-service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.enterprise-service-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  min-height: 97px;
+  overflow: hidden;
+  padding: 0 12px 0 0;
+  border: 1px solid var(--ed-border);
+  border-radius: 6px;
+  background: #fafbf7;
+  color: var(--ed-text);
+  text-align: left;
+}
+
+.enterprise-service-card > img {
+  width: 31%;
+  height: 97px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.enterprise-service-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.enterprise-service-copy strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.enterprise-service-copy > span {
+  display: block;
+  margin-top: 6px;
+  color: var(--ed-muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.enterprise-service-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: var(--ed-gold);
+  color: white;
+}
+
+.enterprise-preview-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px 0;
+  color: var(--ed-muted);
+  font-size: 10px;
+}
+
+/* Preview dialog */
+.enterprise-dialog {
+  width: min(430px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 32px;
+  border: 1px solid var(--ed-border);
+  border-radius: 15px;
+  background: #fafbf7;
+  color: var(--ed-text);
+  box-shadow: 0 20px 80px #14372f30;
+}
+
+.enterprise-dialog::backdrop {
+  background: #14372f88;
+  backdrop-filter: blur(4px);
+}
+
+.enterprise-dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ed-border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ed-text);
+}
+
+.enterprise-dialog .enterprise-eyebrow {
+  margin: 18px 0 9px;
+  font-size: 9px;
+  color: var(--ed-muted);
+}
+
+.enterprise-dialog h2 {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.enterprise-dialog-description {
+  margin: 15px 0 22px !important;
+  color: var(--ed-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Gentle interaction */
+.enterprise-button,
+.enterprise-project-button,
+.enterprise-quick-grid button,
+.enterprise-service-card {
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .enterprise-button:hover,
+  .enterprise-project-button:hover {
+    background: #305744;
+  }
+
+  .enterprise-quick-grid button:hover {
+    background: #edf2e7;
+  }
+
+  .enterprise-service-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 18px #193f3610;
+  }
+}
+
+/* Responsive */
+@media (min-width: 1650px) {
+  .enterprise-dashboard .gis-map-container {
+    height: 450px;
+  }
+
+  .enterprise-project-photo {
+    height: 180px;
+  }
+}
+
+@media (max-width: 1250px) {
+  .enterprise-search {
+    display: none;
+  }
+
+  .enterprise-header-inner {
+    gap: 18px;
+  }
+
+  .enterprise-workspace-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(285px, 1fr);
+  }
+
+  .enterprise-metric {
+    gap: 12px;
+    padding-inline: 12px;
+  }
+
+  .enterprise-metric-icon {
+    width: 47px;
+    height: 47px;
+  }
+
+  .enterprise-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .enterprise-lower-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .enterprise-lower-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .enterprise-quick-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 950px) {
+  .enterprise-nav {
+    display: none;
+  }
+
+  .enterprise-mobile-toggle {
+    display: inline-flex;
+  }
+
+  .enterprise-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .enterprise-workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .enterprise-project-photo {
+    height: 190px;
+  }
+
+  .enterprise-project-facts {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .enterprise-banner-quote {
+    width: 140px;
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 600px) {
+  .enterprise-header-inner,
+  .enterprise-content {
+    width: calc(100% - 24px);
+  }
+
+  .enterprise-header-inner {
+    min-height: 66px;
+  }
+
+  .enterprise-header-actions {
+    gap: 8px;
+  }
+
+  .enterprise-banner {
+    min-height: 230px;
+    margin-top: 8px;
+  }
+
+  .enterprise-banner-content {
+    margin: 24px 18px;
+    padding-left: 15px;
+  }
+
+  .enterprise-banner h1 {
+    max-width: 300px;
+    font-size: 28px;
+  }
+
+  .enterprise-banner-description {
+    font-size: 12px;
+    max-width: 300px;
+  }
+
+  .enterprise-banner-description br {
+    display: none;
+  }
+
+  .enterprise-banner-shade {
+    background: #f2f4eed9;
+  }
+
+  .enterprise-banner-quote {
+    display: none;
+  }
+
+  .enterprise-eyebrow {
+    font-size: 9px;
+  }
+
+  .enterprise-metrics {
+    gap: 9px;
+  }
+
+  .enterprise-metric {
+    align-items: flex-start;
+    min-height: 110px;
+    gap: 9px;
+    padding: 13px 10px;
+  }
+
+  .enterprise-metric-icon {
+    width: 33px;
+    height: 33px;
+  }
+
+  .enterprise-metric-icon svg {
+    width: 19px;
+  }
+
+  .enterprise-metric h2 {
+    font-size: 10px;
+  }
+
+  .enterprise-metric p {
+    font-size: 9px;
+  }
+
+  .enterprise-dashboard .gis-map-container {
+    height: 420px;
+  }
+
+  .enterprise-project-facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .enterprise-lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .enterprise-lower-grid > :last-child {
+    grid-column: auto;
+  }
+
+  .enterprise-quick-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .enterprise-journey-steps {
+    gap: 4px;
+    padding-inline: 10px;
+  }
+
+  .enterprise-stage-icon {
+    width: 39px;
+    height: 39px;
+  }
+
+  .enterprise-journey-steps li:not(:last-child)::after {
+    top: 19px;
+    left: calc(50% + 23px);
+    width: calc(100% - 38px);
+  }
+
+  .enterprise-journey-steps h3 {
+    font-size: 9px;
+  }
+
+  .enterprise-journey-steps p {
+    font-size: 8px;
+  }
+
+  .enterprise-service-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .enterprise-service-copy strong {
+    font-size: 12px;
+  }
+
+  .enterprise-service-copy > span {
+    font-size: 10px;
+  }
+
+  .enterprise-preview-note {
+    align-items: flex-start;
+    font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enterprise-button,
+  .enterprise-project-button,
+  .enterprise-quick-grid button,
+  .enterprise-service-card {
+    transition: none;
+  }
+
+  .enterprise-service-card:hover {
+    transform: none;
+  }
+}
+
+
+/* ===== Stronger dashboard colours and readable typography ===== */
+
+.enterprise-dashboard {
+  --ed-green: #193f36;
+  --ed-green-dark: #13362f;
+  --ed-text: #173b34;
+  --ed-muted: #465f57;
+  --ed-gold: #b88a38;
+}
+
+/* Project Lens */
+
+.enterprise-dashboard .enterprise-lens {
+  background: #fcfdfa;
+  border-color: #cdd8d1;
+}
+
+.enterprise-dashboard .enterprise-lens .enterprise-panel-heading h2 {
+  color: #163a33;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.enterprise-dashboard .enterprise-lens-body h3 {
+  margin: 13px 0 5px;
+  color: #15382f;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
+}
+
+.enterprise-dashboard .enterprise-lens-description {
+  color: #405a52;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.enterprise-dashboard .enterprise-project-facts {
+  margin-top: 15px;
+}
+
+.enterprise-dashboard .enterprise-project-facts > div {
+  gap: 9px;
+  padding: 13px 6px;
+  border-color: #d8e0da;
+}
+
+.enterprise-dashboard .enterprise-project-facts > div > svg {
+  flex-shrink: 0;
+  color: #244b3e;
+}
+
+.enterprise-dashboard .enterprise-project-facts span {
+  color: #40594f;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.enterprise-dashboard .enterprise-project-facts strong {
+  display: block;
+  margin-top: 3px;
+  color: #16392e;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.enterprise-dashboard .enterprise-project-button {
+  min-height: 37px;
+  background: #3d6048;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.enterprise-dashboard .enterprise-project-button:hover {
+  background: #294b35;
+}
+
+/* Acquisition Journey */
+
+.enterprise-dashboard .enterprise-journey-steps {
+  padding-block: 24px 27px;
+}
+
+.enterprise-dashboard .enterprise-stage-icon {
+  position: relative;
+  z-index: 1;
+  width: 54px;
+  height: 54px;
+  border: 1px solid #ffffff85;
+  color: #fff;
+  box-shadow:
+    0 0 0 3px #f8faf6,
+    0 0 0 4px #d4ded5,
+    inset 0 2px 4px #ffffff20;
+}
+
+.enterprise-dashboard .enterprise-journey-steps li:nth-child(1)
+.enterprise-stage-icon {
+  background: linear-gradient(145deg, #5b7f57, #355a40);
+}
+
+.enterprise-dashboard .enterprise-journey-steps li:nth-child(2)
+.enterprise-stage-icon,
+.enterprise-dashboard .enterprise-journey-steps li:nth-child(3)
+.enterprise-stage-icon {
+  background: linear-gradient(145deg, #365e51, #183e34);
+}
+
+.enterprise-dashboard .enterprise-journey-steps li:nth-child(4)
+.enterprise-stage-icon {
+  background: linear-gradient(145deg, #d5ad59, #ae7d2d);
+}
+
+.enterprise-dashboard .enterprise-journey-steps li:nth-child(5)
+.enterprise-stage-icon {
+  background: #edf1ed;
+  color: #294d40;
+  border-color: #d4ded5;
+}
+
+.enterprise-dashboard .enterprise-journey-steps li:not(:last-child)::after {
+  top: 27px;
+  left: calc(50% + 32px);
+  width: calc(100% - 60px);
+  border-color: #819a8e;
+}
+
+.enterprise-dashboard .enterprise-journey-steps h3 {
+  margin-top: 13px;
+  color: #193c32;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.enterprise-dashboard .enterprise-journey-steps p {
+  color: #4d6358;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Rich satellite workspace */
+
+.enterprise-dashboard .gis-workspace-rich {
+  border-color: #21483c;
+  background: #193f36;
+}
+
+.enterprise-dashboard .gis-workspace-rich .gis-toolbar {
+  min-height: 42px;
+  padding: 8px 14px;
+  background: linear-gradient(100deg, #204b40, #14372f);
+  color: #fff;
+}
+
+.enterprise-dashboard .gis-workspace-rich .gis-toolbar h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.enterprise-dashboard .gis-reset-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px;
+  border: 1px solid #ffffff35;
+  border-radius: 5px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.enterprise-dashboard .gis-workspace-rich .gis-map-container {
+  height: 430px;
+  background: #29483a;
+}
+
+.enterprise-dashboard .gis-floating-controls {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.enterprise-dashboard .gis-floating-controls > * {
+  pointer-events: auto;
+}
+
+.enterprise-dashboard .gis-search-area {
+  width: min(380px, 48%);
+}
+
+.enterprise-dashboard .gis-search-form {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 5px 8px 5px 12px;
+  border: 1px solid #d7e0d8;
+  border-radius: 7px;
+  background: #fff;
+  color: #234b3f;
+  box-shadow: 0 3px 12px #102c3026;
+}
+
+.enterprise-dashboard .gis-search-form > svg {
+  flex-shrink: 0;
+}
+
+.enterprise-dashboard .gis-search-form input {
+  width: 100%;
+  min-width: 0;
+  padding: 5px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #183d32;
+  font-size: 12px;
+}
+
+.enterprise-dashboard .gis-search-form input::placeholder {
+  color: #5e7169;
+}
+
+.enterprise-dashboard .gis-search-form:focus-within {
+  outline: 2px solid #be9647;
+  outline-offset: 2px;
+}
+
+.enterprise-dashboard .gis-search-form button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 4px;
+  background: #eaf0e9;
+  color: #224739;
+  cursor: pointer;
+}
+
+.enterprise-dashboard .gis-view-controls {
+  display: flex;
+  gap: 9px;
+}
+
+.enterprise-dashboard .gis-basemap-switch {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #c9d5cb;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 3px 12px #102c3026;
+}
+
+.enterprise-dashboard .gis-basemap-switch button,
+.enterprise-dashboard .gis-layers-button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  background: #fff;
+  color: #193e33;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.enterprise-dashboard .gis-basemap-switch button[aria-pressed="true"] {
+  background: #244f42;
+  color: #fff;
+}
+
+.enterprise-dashboard .gis-layers-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #c9d5cb;
+  border-radius: 6px;
+}
+
+.enterprise-dashboard .gis-search-results {
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 7px 0 0;
+  padding: 5px;
+  list-style: none;
+  border: 1px solid #cdd8ce;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 8px 24px #102c3033;
+}
+
+.enterprise-dashboard .gis-search-results button {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #213e34;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.enterprise-dashboard .gis-search-results button svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.enterprise-dashboard .gis-search-results button:hover {
+  background: #edf2e9;
+}
+
+.enterprise-dashboard .gis-search-message {
+  margin: 7px 0 0;
+  padding: 9px 11px;
+  border-radius: 5px;
+  background: #fff;
+  color: #244638;
+  font-size: 12px;
+}
+
+.enterprise-dashboard .gis-layer-panel {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 54px;
+  width: 220px;
+  padding: 14px;
+  border: 1px solid #c5d5bb80;
+  border-radius: 7px;
+  background: #153d33f2;
+  color: #fff;
+  box-shadow: 0 4px 16px #0003;
+}
+
+.enterprise-dashboard .gis-layer-panel strong {
+  font-size: 13px;
+}
+
+.enterprise-dashboard .gis-layer-panel p,
+.enterprise-dashboard .gis-layer-panel small {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #e0e9de;
+}
+
+.enterprise-dashboard .gis-layer-panel p {
+  margin: 7px 0 12px;
+}
+
+.enterprise-dashboard .gis-layer-panel span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 9px 0;
+  font-size: 12px;
+}
+
+.enterprise-dashboard .gis-layer-panel i {
+  width: 19px;
+  height: 14px;
+  border: 1px solid #efdf91;
+}
+
+.enterprise-dashboard .legend-acquired {
+  background: #b69238;
+}
+
+.enterprise-dashboard .legend-pending {
+  background: #899543;
+}
+
+.enterprise-dashboard .gis-layer-panel .legend-boundary {
+  background: transparent;
+  border: 1px dashed #fff;
+}
+
+.enterprise-dashboard .gis-workspace-rich .gis-status {
+  top: 68px;
+  left: 54px;
+  max-width: calc(100% - 110px);
+}
+
+.enterprise-dashboard .gis-workspace-rich .maplibregl-ctrl-top-left,
+.enterprise-dashboard .gis-workspace-rich .maplibregl-ctrl-top-right {
+  top: 64px;
+}
+
+.enterprise-dashboard .gis-workspace-rich .maplibregl-ctrl-scale {
+  margin: 0 0 30px 12px;
+  padding: 3px 8px;
+  border: 2px solid #fff;
+  border-top: 0;
+  background: #183d34bf;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px #000;
+}
+
+.enterprise-dashboard .gis-search-credit {
+  position: absolute;
+  bottom: 5px;
+  left: 12px;
+  z-index: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: #fffffff0;
+  color: #234436;
+  font-size: 10px;
+}
+
+.enterprise-dashboard .gis-search-credit a {
+  text-decoration: underline;
+}
+
+.enterprise-dashboard .gis-workspace-rich button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Bottom brand band */
+
+.enterprise-dashboard .enterprise-bottom-band {
+  margin-top: 18px;
+  border-top: 3px solid #b9944c;
+  background: linear-gradient(100deg, #20483f, #13382f);
+  color: #f8faf4;
+}
+
+.enterprise-dashboard .enterprise-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1800px;
+  min-height: 78px;
+  margin-inline: auto;
+  padding: 18px 28px;
+}
+
+.enterprise-dashboard .enterprise-bottom-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.enterprise-dashboard .enterprise-bottom-brand strong {
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: -1px;
+}
+
+.enterprise-dashboard .enterprise-bottom-brand span {
+  padding-left: 18px;
+  border-left: 1px solid #ffffff35;
+  color: #e0e9df;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.enterprise-dashboard .enterprise-bottom-statement {
+  margin: 0;
+  color: #f0e3c5;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+}
+
+@media (min-width: 1650px) {
+  .enterprise-dashboard .gis-workspace-rich .gis-map-container {
+    height: 480px;
+  }
+}
+
+@media (max-width: 700px) {
+  .enterprise-dashboard .gis-floating-controls {
+    flex-wrap: wrap;
+  }
+
+  .enterprise-dashboard .gis-search-area {
+    width: 100%;
+  }
+
+  .enterprise-dashboard .gis-view-controls {
+    margin-left: auto;
+  }
+
+  .enterprise-dashboard .gis-workspace-rich .maplibregl-ctrl-top-left,
+  .enterprise-dashboard .gis-workspace-rich .maplibregl-ctrl-top-right {
+    top: 117px;
+  }
+
+  .enterprise-dashboard .gis-workspace-rich .gis-status {
+    top: 120px;
+  }
+
+  .enterprise-dashboard .gis-layer-panel {
+    width: 195px;
+  }
+
+  .enterprise-dashboard .enterprise-stage-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .enterprise-dashboard .enterprise-journey-steps li:not(:last-child)::after {
+    top: 20px;
+    left: calc(50% + 24px);
+    width: calc(100% - 45px);
+  }
+
+  .enterprise-dashboard .enterprise-journey-steps h3 {
+    font-size: 10px;
+  }
+
+  .enterprise-dashboard .enterprise-journey-steps p {
+    font-size: 10px;
+  }
+
+  .enterprise-dashboard .enterprise-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-inline: 20px;
+  }
+
+  .enterprise-dashboard .enterprise-bottom-statement {
+    text-align: left;
+  }
+}
+/* Interaction upgrade: scoped to the dashboard. */
+.enterprise-dashboard .enterprise-workspace-grid {
+  grid-template-columns: minmax(0, 2.45fr) minmax(0, 1fr);
+  transition: grid-template-columns 380ms cubic-bezier(.22,1,.36,1), gap 380ms ease;
+}
+.enterprise-dashboard .enterprise-workspace-grid.lens-is-collapsed {
+  grid-template-columns: minmax(0, 2.45fr) minmax(0, 0fr);
+  gap: 0;
+}
+.enterprise-lens-shell { min-width: 0; overflow: hidden; opacity: 1; transition: opacity 220ms ease; }
+.enterprise-lens-shell > .enterprise-lens { min-width: 280px; height: 100%; }
+.lens-is-collapsed .enterprise-lens-shell { opacity: 0; pointer-events: none; }
+.enterprise-stage-button { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.enterprise-stage-button .enterprise-stage-icon { transition: transform 220ms ease, box-shadow 220ms ease; }
+.enterprise-stage-button[aria-expanded="true"] .enterprise-stage-icon { box-shadow: 0 0 0 4px #f7f8f3, 0 0 0 6px #b9944c; transform: translateY(-3px); }
+.enterprise-stage-detail { margin: 0 16px 18px; padding: 15px; border-left: 3px solid #b9944c; border-radius: 6px; background: #edf2e9; color: #193f36; animation: liva-soft-enter 220ms ease; }
+.enterprise-stage-detail[hidden] { display: none; }
+.enterprise-stage-detail p { margin: 7px 0 12px; font-size: 13px; line-height: 1.6; }
+.enterprise-dashboard :is(button, a, summary) { -webkit-tap-highlight-color: transparent; }
+.enterprise-dashboard :is(button, a, summary):focus-visible { outline: 2px solid #b9944c; outline-offset: 4px; }
+.enterprise-dashboard :is(.enterprise-quick-grid button, .enterprise-service-card, .enterprise-button, .enterprise-project-button, .enterprise-icon-button, .enterprise-lens-toggle) { transition: transform 200ms ease, background-color 200ms ease, box-shadow 200ms ease; }
+.enterprise-dashboard :is(.enterprise-service-card, .enterprise-button, .enterprise-project-button, .enterprise-quick-grid button):active { transform: scale(.98); }
+.enterprise-service-card img, .enterprise-project-photo img { transition: transform 550ms cubic-bezier(.22,1,.36,1); }
+.enterprise-service-arrow { transition: transform 220ms ease; }
+.enterprise-nav details[open] .enterprise-dropdown,
+.enterprise-mobile-menu:not([hidden]), .enterprise-dialog[open] { animation: liva-soft-enter 250ms cubic-bezier(.22,1,.36,1); }
+.enterprise-dialog[open]::backdrop { animation: liva-backdrop 200ms ease; }
+.enterprise-nav summary > svg { transition: transform 200ms ease; }
+.enterprise-nav details[open] summary > svg { transform: rotate(180deg); }
+.enterprise-dashboard .enterprise-service-copy strong { font-size: 13px; line-height: 1.4; color: #173b34; }
+.enterprise-dashboard .enterprise-service-copy > span { font-size: 11px; line-height: 1.5; color: #405d51; }
+@keyframes liva-soft-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes liva-backdrop { from { opacity: 0; } to { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) {
+  .enterprise-service-card:hover img, .enterprise-project-photo:hover img { transform: scale(1.045); }
+  .enterprise-service-card:hover .enterprise-service-arrow { transform: translateX(3px); }
+  .enterprise-quick-grid button:hover, .enterprise-stage-button:hover .enterprise-stage-icon { transform: translateY(-3px); }
+}
+@media (max-width: 950px) {
+  .enterprise-dashboard .enterprise-workspace-grid,
+  .enterprise-dashboard .enterprise-workspace-grid.lens-is-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    transition: grid-template-rows 380ms ease, gap 380ms ease;
+  }
+  .enterprise-dashboard .enterprise-workspace-grid.lens-is-collapsed { grid-template-rows: auto minmax(0, 0fr); }
+  .enterprise-lens-shell > .enterprise-lens { min-width: 0; height: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enterprise-dashboard *, .enterprise-dashboard *::before, .enterprise-dashboard *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
