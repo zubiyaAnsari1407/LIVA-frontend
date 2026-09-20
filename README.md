@@ -92,7 +92,7 @@ Tracks land acquisition progress across stages:
 
 ## LIVA Workflow
 
-```text
+
 Government / Project Data
           ↓
 Data Validation & Processing
@@ -126,6 +126,7 @@ Predict → Explain → Simulate → Act
 
 The system is designed around decision-making rather than only displaying analytics.
 
+---
 Technology Stack
 
 Frontend
@@ -160,6 +161,7 @@ Vercel
 Render
 MongoDB Atlas
 Cloudinary
+---
 Live Cloud Architecture
 User
  ↓
@@ -175,7 +177,7 @@ Cloud Database
 Images → Cloudinary
 
 The deployed prototype can receive new project records from users and persist them in the cloud database without requiring the developer's local computer to remain running.
-
+---
 Data Approach
 
 LIVA separates:
@@ -187,7 +189,7 @@ Demo / illustrative records
 Demo records are explicitly marked and are not presented as verified government data.
 
 The ML research layer uses official/public-authority infrastructure project information where available.
-
+---
 Prototype Status
 
 Live Working Prototype
@@ -195,15 +197,14 @@ Live Working Prototype
 The current implementation demonstrates the complete core workflow including project management, GIS intelligence, ML risk analysis, Explainable AI, intervention simulation, workflow monitoring and cloud persistence.
 
 Some production-scale features such as automatic model retraining, external notification services, full audit logging and backend-secured enterprise authentication are planned as future extensions.
-
+---
 Designed For
 
 Government and authorized infrastructure stakeholders such as:
 
 Land Acquisition Officers · Project Officers · District Administration · Revenue Departments · Legal Teams · Compensation & R&R Teams · Senior Decision Makers
-
+---
 Team
-
 Team Paradox
 
 Smart India Hackathon 2026
