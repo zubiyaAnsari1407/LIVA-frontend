@@ -92,7 +92,7 @@ Tracks land acquisition progress across stages:
 
 ## LIVA Workflow
 
-text
+```text
 Government / Project Data
           ↓
 Data Validation & Processing
@@ -160,7 +160,6 @@ Vercel
 Render
 MongoDB Atlas
 Cloudinary
-
 Live Cloud Architecture
 User
  ↓
