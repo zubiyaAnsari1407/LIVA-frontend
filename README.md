@@ -128,7 +128,7 @@ The system is designed around decision-making rather than only displaying analyt
 
 ---
 
-Technology Stack
+## Technology Stack
 
 Frontend
 
@@ -165,7 +165,8 @@ Cloudinary
 
 ---
 
-Live Cloud Architecture
+##Live Cloud Architecture
+
 User
  ↓
 Vercel
@@ -183,7 +184,7 @@ The deployed prototype can receive new project records from users and persist th
 
 ---
 
-Data Approach
+## Data Approach
 
 LIVA separates:
 
@@ -197,7 +198,7 @@ The ML research layer uses official/public-authority infrastructure project info
 
 ---
 
-Prototype Status
+## Prototype Status
 
 Live Working Prototype
 
@@ -207,7 +208,7 @@ Some production-scale features such as automatic model retraining, external noti
 
 ---
 
-Designed For
+## Designed For
 
 Government and authorized infrastructure stakeholders such as:
 
@@ -215,7 +216,7 @@ Land Acquisition Officers · Project Officers · District Administration · Reve
 
 ---
 
-Team
+## Team
 Team Paradox
 
 Smart India Hackathon 2026
