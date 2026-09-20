@@ -184,7 +184,7 @@ The deployed prototype can receive new project records from users and persist th
 
 ---
 
-## Data Approach
+##Data Approach
 
 LIVA separates:
 
