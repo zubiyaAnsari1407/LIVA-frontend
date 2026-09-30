@@ -156,6 +156,23 @@
 }
 
 .ac-tabs, .ac-view-switch { display: flex; gap: 6px; }
+.ac-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+.ac-toolbar-create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 37px;
+  padding: 7px 13px;
+  border: 1px solid #ffffff45;
+  border-radius: 5px;
+  background: #f1f5e9;
+  color: var(--ac-green);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ac-toolbar-create:disabled { cursor: default; opacity: .6; }
+.ac-toolbar-create:not(:disabled):hover { background: #fff; }
 .ac-tabs button, .ac-view-switch button {
   display: inline-flex;
   align-items: center;
@@ -414,7 +431,7 @@
   .ac-stats { gap: 9px; }
   .ac-stats article { align-items: flex-start; flex-direction: column; gap: 11px; padding: 15px; }
   .ac-toolbar { align-items: flex-start; flex-direction: column; gap: 12px; padding: 13px; }
-  .ac-view-switch { align-self: flex-end; }
+  .ac-toolbar-actions { width: 100%; justify-content: space-between; }
   .ac-filters { grid-template-columns: 1fr; padding: 14px; gap: 9px; }
   .ac-task-list { grid-template-columns: 1fr; padding-inline: 14px; }
   .ac-alert { align-items: flex-start; flex-wrap: wrap; padding: 14px; }

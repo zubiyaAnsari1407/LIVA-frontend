@@ -14,7 +14,6 @@ import {
 import LandingNavbar from '../components/landing/LandingNavbar'
 import HeroSection from '../components/landing/HeroSection'
 import LandingMotion from '../components/landing/LandingMotion'
-import LandingExtras from '../components/landing/LandingExtras'
 import LandingFooter from '../components/landing/LandingFooter'
 
 import '../styles/landing.css'
@@ -22,19 +21,19 @@ import '../styles/landing.css'
 
 const steps = [
   {
-    title: 'Connect verified data',
+    title: 'Bring information together',
     description:
-      'Bring together land, planning, legal and project records in one place.',
+      'Keep important project and land information in one place.',
   },
   {
-    title: 'Understand risks',
+    title: 'Find possible delays',
     description:
-      'See what might cause delay, explore the drivers and assess the implications.',
+      'See which issues may slow the project down.',
   },
   {
-    title: 'Assign and monitor action',
+    title: 'Take the next step',
     description:
-      'Coordinate with your team, track progress and keep acquisition moving.',
+      'Know what needs to be done and follow up.',
   },
 ]
 
@@ -49,7 +48,7 @@ export default function LandingPage() {
         className="service-link"
         aria-label={`Access ${service}`}
       >
-        Explore service
+        View
 
         <ArrowRight
           size={17}
@@ -96,25 +95,17 @@ export default function LandingPage() {
           </h2>
 
           <p>
-            Liva brings together land,
-            legal, planning and stakeholder
-            information so you can see
-            what’s happening, understand
-            what might delay progress,
-            and take coordinated action
-            earlier.
+          LIVA brings important project and land information together, so you can quickly see what is happening and know what needs to be done next.
           </p>
 
           <p className="intro-note">
             <span />
 
-            Clearer insight
             <br />
 
-            Smoother acquisition
+       
             <br />
 
-            Stronger coordination
           </p>
         </section>
 
@@ -155,17 +146,17 @@ export default function LandingPage() {
 
                 <div>
                   <h3>
-                    GIS Workspace
+                    Map
                   </h3>
 
                   <p>
-                    See projects in context.
+                    View projects and land areas on the map.
                   </p>
                 </div>
               </div>
 
               {serviceLink(
-                'GIS Workspace',
+                'Map',
               )}
             </div>
           </article>
@@ -174,91 +165,73 @@ export default function LandingPage() {
           {/* DELAY INTELLIGENCE */}
 
           <article className="service-card delay-card">
-            <ChartNoAxesColumnIncreasing
-              size={38}
-              strokeWidth={1.3}
-              aria-hidden="true"
+            <img
+              src="/images/delay.jpg"
+              alt="Infrastructure project corridor and delay intelligence"
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.visibility = 'hidden'
+              }}
             />
 
-            <h3>
-              Delay Intelligence
-            </h3>
+            <div className="image-card-overlay" />
 
-            <p>
-              Understand risk.
-              <br />
-              Explain the drivers.
-            </p>
+            <div className="image-card-content">
+              <div className="card-title-row">
+                <ChartNoAxesColumnIncreasing
+                  size={31}
+                  strokeWidth={1.3}
+                  aria-hidden="true"
+                />
 
-            {serviceLink(
-              'Delay Intelligence',
-            )}
+                <div>
+                  <h3>Delay Check</h3>
+                  <p>
+                    See which projects
+                    <br />
+                    may be delayed.
+                  </p>
+                </div>
+              </div>
+
+              {serviceLink('Delay Check')}
+            </div>
           </article>
 
 
           {/* DIGITAL TWIN */}
 
           <article className="service-card twin-card">
-            <div className="card-title-row">
-              <Network
-                size={36}
-                strokeWidth={1.3}
-                aria-hidden="true"
-              />
+            <img
+              src="/images/risk.jpg"
+              alt="Aerial land parcels with risk intelligence"
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.visibility = 'hidden'
+              }}
+            />
 
-              <div>
-                <h3>
-                  Digital Twin &amp;
-                  Scenarios
-                </h3>
+            <div className="image-card-overlay" />
 
-                <p>
-                  Test options.
-                  Explore dependencies.
-                </p>
+            <div className="image-card-content">
+              <div className="card-title-row">
+                <Network
+                  size={31}
+                  strokeWidth={1.3}
+                  aria-hidden="true"
+                />
+
+                <div>
+                  <h3>Risk Intelligence</h3>
+                  <p>
+                    Identify projects and parcels
+                    <br />
+                    that need attention.
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <svg
-              className="twin-illustration"
-              viewBox="0 0 500 120"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M0 98L55 65L110 82L170 43L228 76L285 30L342 62L400 35L500 73V120H0Z"
-                fill="currentColor"
-                opacity=".13"
-              />
-
-              <path
-                d="M0 110L75 94L136 110L205 70L266 98L330 55L405 74L500 46V120H0Z"
-                fill="currentColor"
-                opacity=".17"
-              />
-
-              <path
-                d="M12 105L490 65M12 93L490 53M85 95V118M195 85V118M305 75V118M415 65V118"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-
-              <path
-                d="M12 16L490 76M110 28V106M260 47V93M410 66V78"
-                stroke="currentColor"
-                strokeWidth="1"
-                opacity=".65"
-              />
-            </svg>
-
-            <div className="card-bottom-row">
-              <span className="concept-label">
-                Concept preview
-              </span>
-
-              {serviceLink(
-                'Digital Twin & Scenarios',
-              )}
+              {serviceLink('Risk Intelligence')}
             </div>
           </article>
 
@@ -267,7 +240,7 @@ export default function LandingPage() {
 
           <article className="service-card court-card">
             <img
-              src="/images/liva-court.png"
+              src="/images/liva-land.png"
               alt="Illustrative courthouse architecture"
               loading="lazy"
               onError={(event) => {
@@ -286,20 +259,19 @@ export default function LandingPage() {
 
                 <div>
                   <h3>
-                    Court &amp;
-                    Litigation
+                    Land Matters
                   </h3>
 
                   <p>
-                    Track key matters.
+                    View important issues
                     <br />
-                    Stay ahead.
+                    related to the land.
                   </p>
                 </div>
               </div>
 
               {serviceLink(
-                'Court & Litigation',
+                'Land Matters',
               )}
             </div>
           </article>
@@ -323,9 +295,9 @@ export default function LandingPage() {
                   </h3>
 
                   <p>
-                    Find what you need.
+                    Check documents
                     <br />
-                    Keep things moving.
+                    and payment details.
                   </p>
                 </div>
               </div>
@@ -350,31 +322,39 @@ export default function LandingPage() {
           {/* ACTION CENTRE */}
 
           <article className="service-card action-card">
-            <div className="card-title-row">
-              <CircleCheck
-                size={36}
-                strokeWidth={1.3}
-                aria-hidden="true"
-              />
+            <img
+              src="/images/action.jpg"
+              alt="Project action and follow-up workspace"
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.visibility = 'hidden'
+              }}
+            />
 
-              <div>
-                <h3>
-                  Action Centre
-                </h3>
+            <div className="image-card-overlay" />
 
-                <p>
-                  Turn insight into
-                  follow-up.
-                  <br />
-                  Keep your project moving.
-                </p>
+            <div className="image-card-content">
+              <div className="card-title-row">
+                <CircleCheck
+                  size={31}
+                  strokeWidth={1.3}
+                  aria-hidden="true"
+                />
+
+                <div>
+                  <h3>Action Centre</h3>
+                  <p>
+                    See what needs to be done next.
+                    <br />
+                    Complete important follow-up.
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {serviceLink(
-              'Action Centre',
-            )}
+              {serviceLink('Action Centre')}
+            </div>
           </article>
+
 
         </section>
 
@@ -392,8 +372,8 @@ export default function LandingPage() {
               aria-hidden="true"
             />
 
-            Select a role to enter
-            the LIVA workspace.
+            Choose how you want to use
+            LIVA.
           </p>
 
           <span />
@@ -415,9 +395,9 @@ export default function LandingPage() {
             </p>
 
             <h2 id="workflow-heading">
-              From data to
+              How LIVA works
               <br />
-              action, in three steps.
+              in three simple steps.
             </h2>
           </div>
 
@@ -447,61 +427,62 @@ export default function LandingPage() {
         </section>
 
 
+
         {/* ================================= */}
-        {/* TEAM */}
+        {/* WHO IT'S FOR */}
         {/* ================================= */}
 
         <section
-          className="team-banner"
-          aria-labelledby="team-heading"
+          id="who-its-for"
+          className="who-section"
+          aria-labelledby="who-heading"
         >
-          <img
-            src="/images/liva-team.png"
-            alt=""
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.onerror =
-                null
+          <div className="who-heading">
+            <p className="section-eyebrow">Who it’s for</p>
 
-              event.currentTarget.src =
-                '/images/liva-hero.png'
-            }}
-          />
-
-          <div className="team-overlay" />
-
-          <div className="team-copy">
-            <h2 id="team-heading">
-              Built for coordinated
-              <br />
-              acquisition workflows.
+            <h2 id="who-heading">
+              One platform for
+             
+              different users.
             </h2>
 
             <p>
-              Get a clearer view of
-              progress, make informed
-              decisions and keep your
-              infrastructure projects
-              moving.
+              LIVA provides simple access to the information each user needs.
             </p>
           </div>
 
-          <p className="team-caption">
-            Align
-            <br />
-            Resolve
-            <br />
-            Progress together
-          </p>
+          <div className="who-grid">
+            <article className="who-card">
+              <div className="who-icon">
+                <ChartNoAxesColumnIncreasing size={24} strokeWidth={1.4} aria-hidden="true" />
+              </div>
+              <h3>Project Officers</h3>
+              <p>
+                Review projects, check progress and follow up on pending work.
+              </p>
+            </article>
+
+            <article className="who-card">
+              <div className="who-icon">
+                <LockKeyhole size={24} strokeWidth={1.4} aria-hidden="true" />
+              </div>
+              <h3>Administrator</h3>
+              <p>
+                Manage records, users and important project information.
+              </p>
+            </article>
+
+            <article className="who-card">
+              <div className="who-icon">
+                <Map size={24} strokeWidth={1.4} aria-hidden="true" />
+              </div>
+              <h3>Land Owners</h3>
+              <p>
+                View available project information and understand land-related updates.
+              </p>
+            </article>
+          </div>
         </section>
-
-
-        {/* ================================= */}
-        {/* EXTRA LANDING SECTIONS */}
-        {/* ================================= */}
-
-        <LandingExtras />
-
 
         {/* ================================= */}
         {/* FINAL CTA */}
@@ -514,13 +495,13 @@ export default function LandingPage() {
         >
           <div>
             <p className="section-eyebrow">
-              A clearer path for
-              what’s next
+              Ready to get started?
+              
             </p>
 
             <h2 id="cta-heading">
-              Move from uncertainty
-              to informed action.
+              See your project
+              and take the next step.
             </h2>
           </div>
 
@@ -541,7 +522,7 @@ export default function LandingPage() {
               to="/access"
               className="landing-button button-outline"
             >
-              Choose Access Role
+              Choose Your Role
             </Link>
           </div>
         </section>

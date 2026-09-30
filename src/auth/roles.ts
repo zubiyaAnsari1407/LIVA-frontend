@@ -1,25 +1,21 @@
 export type UserRole =
-  | 'judge'
   | 'admin'
   | 'officer'
-  | 'analyst'
+  | 'landowner'
 
 
 export const ROLE_LABELS: Record<
   UserRole,
   string
 > = {
-  judge:
-    'Judge / Demo',
-
   admin:
     'Administrator',
 
   officer:
     'Project Officer',
 
-  analyst:
-    'Analyst / Viewer',
+  landowner:
+    'Landowner',
 }
 
 
@@ -121,15 +117,13 @@ const OFFICER_PERMISSIONS:
 ]
 
 
-const ANALYST_PERMISSIONS:
+const LANDOWNER_PERMISSIONS:
   Permission[] = [
   'dashboard.view',
 
   'projects.view',
 
   'workflow.view',
-
-  'actions.view',
 
   'documents.view',
 
@@ -139,13 +133,11 @@ const ANALYST_PERMISSIONS:
 
   'simulation.view',
 
+  'simulation.run',
+
   'reports.view',
-  'reports.export',
 ]
 
-const JUDGE_PERMISSIONS: Permission[] = [
-  ...ADMIN_PERMISSIONS,
-]
 
 export const ROLE_PERMISSIONS:
   Record<
@@ -158,11 +150,8 @@ export const ROLE_PERMISSIONS:
   officer:
     OFFICER_PERMISSIONS,
 
-  analyst:
-    ANALYST_PERMISSIONS,
-
-  judge:
-    JUDGE_PERMISSIONS,
+  landowner:
+    LANDOWNER_PERMISSIONS,
 }
 
 

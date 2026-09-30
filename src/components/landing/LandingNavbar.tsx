@@ -6,9 +6,7 @@ const links = [
   ['Overview', '#overview'],
   ['Services', '#services'],
   ['How it works', '#how-it-works'],
-  ['Why Liva', '#why-liva'],
   ['Who it’s for', '#who-its-for'],
-  ['FAQs', '#faqs'],
 ]
 
 export default function LandingNavbar() {

@@ -7,6 +7,7 @@ import type {
   SimulationHistoryItem,
   SimulationResponse,
 } from "../types/simulation";
+import { getLivaProjectRiskFeatures } from "./riskApi";
 
 
 const API_BASE_URL =
@@ -46,6 +47,9 @@ async function parseResponse<T>(
 export async function getSimulationFeatures(
   projectId: string,
 ): Promise<RiskFeatures> {
+  if (projectId.startsWith("LIVA-PRJ-")) {
+    return getLivaProjectRiskFeatures(projectId);
+  }
   const response = await fetch(
     `${API_BASE_URL}/api/risk/project/${encodeURIComponent(
       projectId,

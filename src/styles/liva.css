@@ -1,0 +1,187 @@
+/* =========================================================
+   LIVA — Project Context Banner
+========================================================= */
+
+.project-context-banner {
+  position: relative;
+  isolation: isolate;
+  min-height: 158px;
+  overflow: hidden;
+  border: 1px solid #d6e0d5;
+  border-radius: 16px;
+  background: #173f35;
+  box-shadow: 0 8px 26px rgba(24, 54, 44, 0.07);
+}
+
+.project-context-image {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: scale(1.01);
+  transition:
+    background-image 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.project-context-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(14, 55, 46, 0.96) 0%,
+      rgba(14, 55, 46, 0.88) 34%,
+      rgba(14, 55, 46, 0.56) 68%,
+      rgba(14, 55, 46, 0.38) 100%
+    );
+}
+
+.project-context-content {
+  min-height: 158px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 34px;
+  padding: 25px 28px;
+  color: #fff;
+}
+
+.project-context-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.project-context-label {
+  margin: 0 0 7px;
+  color: #d5b77a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.project-context-main h1 {
+  max-width: 850px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(21px, 2vw, 30px);
+  font-weight: 750;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+
+.project-context-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin-top: 14px;
+}
+
+.project-context-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.project-context-meta svg {
+  flex: 0 0 auto;
+  opacity: 0.9;
+}
+
+.project-context-selector {
+  width: min(370px, 34%);
+  flex: 0 0 min(370px, 34%);
+}
+
+.project-context-selector > span {
+  display: block;
+  margin-bottom: 7px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.project-context-select-wrap {
+  position: relative;
+}
+
+.project-context-select-wrap select {
+  width: 100%;
+  min-height: 48px;
+  appearance: none;
+  padding: 0 42px 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.96);
+  color: #193f36;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(8, 35, 28, 0.12);
+}
+
+.project-context-select-wrap select:focus {
+  border-color: #d5b77a;
+  box-shadow:
+    0 0 0 3px rgba(213, 183, 122, 0.2),
+    0 6px 18px rgba(8, 35, 28, 0.12);
+}
+
+.project-context-select-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  pointer-events: none;
+  color: #315b4d;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 900px) {
+  .project-context-content {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .project-context-selector {
+    width: min(520px, 100%);
+    flex-basis: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .project-context-banner {
+    min-height: 230px;
+  }
+
+  .project-context-content {
+    min-height: 230px;
+    padding: 21px;
+  }
+
+  .project-context-main h1 {
+    font-size: 21px;
+  }
+
+  .project-context-meta {
+    gap: 7px 13px;
+  }
+
+  .project-context-meta span {
+    font-size: 10px;
+  }
+
+  .project-context-selector {
+    width: 100%;
+  }
+}

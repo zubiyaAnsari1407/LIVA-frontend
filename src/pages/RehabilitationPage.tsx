@@ -11,6 +11,10 @@ const rehabilitationConfig: WorkspaceConfig = {
 
   // Community / rehabilitation visual shown in the hero.
   image: '/images/liva-team.png',
+  hideParcelField: true,
+  hideSourceFields: true,
+  hideSelectorNote: true,
+  hideResultCount: true,
 
   fields: [
     {

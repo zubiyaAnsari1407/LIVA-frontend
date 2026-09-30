@@ -14,18 +14,21 @@ import RoleSwitcher from './RoleSwitcher'
 
 import type {
   Permission,
+  UserRole,
 } from './roles'
 
 
 type ProtectedRouteProps = {
   children: ReactNode
   permission?: Permission
+  role?: UserRole
 }
 
 
 export default function ProtectedRoute({
   children,
   permission,
+  role: requiredRole,
 }: ProtectedRouteProps) {
   const {
     role,
@@ -40,6 +43,10 @@ export default function ProtectedRoute({
         replace
       />
     )
+  }
+
+  if (requiredRole && role !== requiredRole) {
+    return <Navigate to="/dashboard" replace />
   }
 
 

@@ -302,13 +302,13 @@
   text-transform: uppercase;
 }
 
-.intro-note span {
+/* .intro-note span {
   display: block;
   width: 32px;
   height: 1px;
   margin-bottom: 14px;
   background: #829184;
-}
+} */
 
 /* Approved asymmetric six-card composition */
 .services-grid {
@@ -560,9 +560,10 @@
 /* Workflow */
 .workflow-section {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
   gap: 25px;
   padding: 35px 23px 42px;
+
 }
 
 .workflow-heading .section-eyebrow {
@@ -2140,4 +2141,508 @@
   .footer-link-group a svg {
     transition: none;
   }
+}
+
+/* =========================================
+   WHO IT'S FOR
+   ========================================= */
+
+.who-section {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 90px 0;
+  margin-top: -56px;
+}
+
+.who-heading {
+  margin-bottom: 36px;
+}
+
+.who-heading .section-eyebrow {
+  margin-bottom: 14px;
+}
+
+.who-heading h2 {
+  margin: 0;
+  font-size: clamp(30px, 3.2vw, 42px);
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: #173f35;
+}
+
+.who-heading > p:last-child {
+  max-width: 520px;
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #526158;
+}
+.who-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.who-card {
+  min-height: 220px;
+  padding: 28px;
+  border: 1px solid #d8ddd2;
+  border-radius: 20px;
+  background: #f8f7f1;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.who-card:hover {
+  transform: translateY(-3px);
+  border-color: #aab8a6;
+  box-shadow: 0 12px 30px rgba(23, 63, 53, 0.08);
+}
+
+.who-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  border: 1px solid #d5ddd0;
+  border-radius: 14px;
+  background: #e9eee1;
+  color: #173f35;
+}
+
+.who-card h3 {
+  margin: 0 0 10px;
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: #173f35;
+}
+
+.who-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #59665e;
+  max-width: 300px;
+}
+
+@media (max-width: 800px) {
+  .who-section {
+    width: min(100% - 32px, 600px);
+    padding: 65px 0;
+  }
+
+  .who-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .who-card {
+    min-height: auto;
+  }
+}
+
+/* =========================================
+   FINAL SERVICES — CLEAN 3 x 2 GRID
+   ========================================= */
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 245px);
+  gap: 14px;
+}
+
+.service-card {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  min-height: 0;
+  height: 100%;
+  border-radius: 17px;
+}
+
+/* Map */
+.gis-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--forest);
+}
+
+.gis-card > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  flex: none;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.gis-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    #14281d10 15%,
+    #14281d35 48%,
+    #14281de8 100%
+  );
+  pointer-events: none;
+}
+
+.gis-content {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 22px 23px 18px;
+  background: transparent;
+}
+
+/* Delay Check */
+.delay-card {
+  position: relative;
+  padding: 24px;
+  background: linear-gradient(120deg, #dce6a9, #cbd881);
+}
+
+/* Risk Intelligence */
+.twin-card {
+  position: relative;
+  padding: 24px;
+  background: #c2cdb8;
+  color: #263a2c;
+}
+
+.twin-illustration {
+  height: 82px;
+}
+
+/* Land Matters */
+.court-card {
+  position: relative;
+  background: var(--forest);
+}
+
+.court-card > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.court-card::after {
+  background: linear-gradient(
+    180deg,
+    #14281d08 15%,
+    #14281d2e 45%,
+    #14281de8 100%
+  );
+}
+
+.court-content {
+  inset: auto 23px 17px;
+}
+
+/* Documents */
+.documents-card {
+  position: relative;
+  padding: 0;
+  gap: 0;
+  background: #d9d3c4;
+  color: #20392b;
+}
+
+.documents-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    #f1ede3e8 0%,
+    #f1ede3c9 38%,
+    #20392b25 68%,
+    #20392b08 100%
+  );
+  pointer-events: none;
+}
+
+.documents-copy {
+  position: relative;
+  z-index: 2;
+  width: 58%;
+  height: 100%;
+  padding: 23px;
+  display: flex;
+  flex-direction: column;
+}
+
+.documents-card > img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Action Centre */
+.action-card {
+  padding: 24px;
+  background: var(--forest);
+}
+
+/* Desktop only: keep the six cards equal and simple */
+@media (min-width: 851px) {
+  .services-grid .service-card {
+    min-height: 0;
+  }
+}
+
+/* Tablet */
+@media (max-width: 850px) and (min-width: 601px) {
+  .services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 220px);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .services-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .service-card {
+    min-height: 205px;
+    height: 205px;
+  }
+
+  .gis-card,
+  .court-card {
+    height: 300px;
+  }
+}
+
+
+/* =========================================
+   IMAGE CARDS — DELAY / RISK / ACTION
+   ========================================= */
+
+.delay-card,
+.twin-card,
+.action-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  color: #fff;
+  background: var(--forest);
+}
+
+.delay-card > img,
+.twin-card > img,
+.action-card > img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.image-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    #14281d08 15%,
+    #14281d20 42%,
+    #14281dcf 100%
+  );
+  pointer-events: none;
+}
+
+.image-card-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px 23px 17px;
+}
+
+.image-card-content .card-title-row {
+  gap: 13px;
+}
+
+.image-card-content h3,
+.image-card-content p,
+.image-card-content .service-link {
+  color: #fff;
+}
+
+.image-card-content h3 {
+  font-size: 17px;
+}
+
+.image-card-content p {
+  margin-top: 7px;
+}
+
+.image-card-content .service-link {
+  margin-top: 8px;
+  align-self: flex-end;
+}
+
+.delay-card:hover > img,
+.twin-card:hover > img,
+.action-card:hover > img {
+  transform: scale(1.035);
+}
+
+@media (max-width: 600px) {
+  .image-card-content {
+    padding: 22px 23px 17px;
+  }
+}
+
+
+/* =========================================
+   DOCUMENTS — SAME BOTTOM CONTENT AS ALL CARDS
+   ========================================= */
+
+.documents-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  color: #fff;
+  background: var(--forest);
+}
+
+.documents-card > img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
+}
+
+.documents-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    #14281d08 15%,
+    #14281d20 42%,
+    #14281dcf 100%
+  );
+  pointer-events: none;
+}
+
+.documents-copy {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px 23px 17px;
+}
+
+.documents-copy .card-title-row {
+  gap: 13px;
+}
+
+.documents-copy h3,
+.documents-copy p {
+  color: #fff;
+}
+
+.documents-copy h3 {
+  font-size: 17px;
+}
+
+.documents-copy p {
+  margin-top: 7px;
+}
+
+.documents-copy .service-link {
+  margin-top: 8px;
+  align-self: flex-end;
+  color: #fff;
+}
+
+.documents-card:hover > img {
+  transform: scale(1.035);
+}
+
+
+/* =========================================
+   CARD TEXT — STRONGER FOCUS
+   ========================================= */
+
+.image-card-content h3,
+.gis-content h3,
+.court-content h3,
+.documents-copy h3 {
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.image-card-content p,
+.gis-content p,
+.court-content p,
+.documents-copy p {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.32);
+}
+
+.image-card-content .service-link,
+.gis-content .service-link,
+.court-content .service-link,
+.documents-copy .service-link {
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Slightly stronger lower fade so text remains the first focus */
+.gis-card::after,
+.court-card::after,
+.delay-card .image-card-overlay,
+.twin-card .image-card-overlay,
+.action-card .image-card-overlay,
+.documents-card::after {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 40, 29, 0.03) 12%,
+    rgba(20, 40, 29, 0.18) 42%,
+    rgba(20, 40, 29, 0.82) 100%
+  );
 }

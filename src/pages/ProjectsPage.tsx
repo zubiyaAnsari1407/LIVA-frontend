@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import {
-  ArrowLeft,
   ArrowRight,
   Building2,
   ChevronDown,
@@ -19,6 +18,7 @@ import {
 } from 'lucide-react'
 
 import { useAuth } from '../auth/AuthContext'
+import { useFlash } from '../context/FlashContext'
 import ProjectForm from '../components/ProjectForm'
 import '../styles/projects.css'
 
@@ -127,6 +127,29 @@ function isProject(value: unknown): value is Project {
   )
 }
 
+function normalizeLivaProject(value: unknown): Project | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  const id = typeof item.projectId === 'string' ? item.projectId : ''
+  const name = typeof item.projectName === 'string' ? item.projectName : ''
+  if (!id || !name) return null
+
+  return {
+    id,
+    name,
+    state: typeof item.state === 'string' ? item.state : 'Maharashtra',
+    district: typeof item.district === 'string' ? item.district : '',
+    stage: typeof item.status === 'string' ? item.status.replaceAll('_', ' ') : 'Not specified',
+    progress: typeof item.progress === 'number' ? item.progress : null,
+    physical_progress_pct: typeof item.progress === 'number' ? item.progress : null,
+    description: `LIVA project · Survey ${String(item.surveyNumber ?? 'not recorded')} · ${String(item.village ?? 'Location not recorded')}`,
+    isDemo: item.isDemo === true,
+    locationDisplayName: [item.village, item.district, item.state].filter((part) => typeof part === 'string' && part).join(', '),
+    sourceName: item.isDemo === true ? 'LIVA demo project' : 'LIVA project registry',
+    sourceRecordId: id,
+  }
+}
+
 function progressValue(project: Project) {
   return project.progress ?? project.physical_progress_pct ?? null
 }
@@ -222,6 +245,7 @@ function ProjectVisual({ project }: { project: Project }) {
 
 export default function ProjectsPage() {
   const { can } = useAuth()
+  const { success: flashSuccess, error: flashError } = useFlash()
   const canDeleteProjects = can('projects.delete')
 
   const [projects, setProjects] = useState<Project[]>([])
@@ -249,27 +273,28 @@ export default function ProjectsPage() {
       setError('')
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/projects`, {
-          signal: controller.signal,
-        })
+        const [portfolioResponse, livaResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/projects`, { signal: controller.signal }),
+          fetch(`${API_BASE_URL}/api/liva/projects`, { signal: controller.signal }),
+        ])
 
-        if (!response.ok) {
-          throw new Error(
-            `Unable to load projects. Server returned ${response.status}.`,
-          )
+        if (!portfolioResponse.ok && !livaResponse.ok) {
+          throw new Error('Unable to load the project registers. Check the backend connection.')
         }
 
-        const data: unknown = await response.json()
-        if (!data || typeof data !== 'object') {
-          throw new Error('The server returned an invalid project response.')
+        const portfolioData: unknown = portfolioResponse.ok ? await portfolioResponse.json() : { items: [] }
+        const livaData: unknown = livaResponse.ok ? await livaResponse.json() : []
+        const portfolioItems = typeof portfolioData === 'object' && portfolioData !== null
+          ? (portfolioData as Record<string, unknown>).items
+          : null
+        if (!Array.isArray(portfolioItems) || !portfolioItems.every(isProject)) {
+          throw new Error('The project portfolio returned invalid records.')
         }
+        const livaItems = Array.isArray(livaData) ? livaData.map(normalizeLivaProject).filter((item): item is Project => item !== null) : []
+        const allProjects = [...portfolioItems, ...livaItems]
+          .filter((project, index, all) => all.findIndex((candidate) => candidate.id === project.id) === index)
 
-        const items = (data as Record<string, unknown>).items
-        if (!Array.isArray(items) || !items.every(isProject)) {
-          throw new Error('The server returned invalid project records.')
-        }
-
-        if (!controller.signal.aborted) setProjects(items)
+        if (!controller.signal.aborted) setProjects(allProjects)
       } catch (err) {
         if (!controller.signal.aborted) {
           setProjects([])
@@ -477,11 +502,13 @@ export default function ProjectsPage() {
       setProjects((current) =>
         current.filter((project) => project.id !== deleteTarget.id),
       )
+      flashSuccess('Project deleted successfully.')
       setDeleteTarget(null)
     } catch (err) {
-      setDeleteError(
-        err instanceof Error ? err.message : 'Unable to delete this project.',
-      )
+      const message =
+        err instanceof Error ? err.message : 'Unable to delete this project.'
+      setDeleteError(message)
+      flashError(message)
     } finally {
       setDeleting(false)
     }
@@ -493,26 +520,7 @@ export default function ProjectsPage() {
         Skip to projects
       </a>
 
-      <header className="portfolio-header">
-        <div className="portfolio-nav">
-          <Link className="portfolio-brand" to="/" aria-label="Liva home">
-            Liva<span>.</span>
-          </Link>
-
-          <nav aria-label="Workspace navigation">
-            <Link to="/dashboard">Overview</Link>
-            <Link to="/projects" aria-current="page">
-              Projects
-            </Link>
-            <Link to="/dashboard#dashboard-map">GIS Workspace</Link>
-          </nav>
-
-          <Link className="portfolio-back" to="/dashboard">
-            <ArrowLeft size={16} aria-hidden="true" />
-            <span>Dashboard</span>
-          </Link>
-        </div>
-      </header>
+     
 
       <main id="portfolio-main" className="portfolio-main">
         <div className="portfolio-breadcrumb">

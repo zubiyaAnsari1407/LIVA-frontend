@@ -5,10 +5,6 @@ import {
 } from 'react'
 
 import {
-  Link,
-} from 'react-router'
-
-import {
   WORKFLOW_API,
   workflowError,
   workflowRequest,
@@ -32,6 +28,7 @@ type Project = {
 export default function ReportsPage() {
   const {
     can,
+    role,
   } = useAuth()
 
   const canExportReports =
@@ -59,6 +56,8 @@ export default function ReportsPage() {
     loading,
     setLoading,
   ] = useState(true)
+
+  const reportKind = (role === 'officer' || role === 'admin') && kind === 'litigation' ? 'compensation' : kind
 
   const [
     projectError,
@@ -158,7 +157,7 @@ export default function ReportsPage() {
 
       const response =
         await fetch(
-          `${WORKFLOW_API}/api/workflow/reports/${kind}.csv${query}`,
+          `${WORKFLOW_API}/api/workflow/reports/${reportKind}.csv${query}`,
         )
 
       if (!response.ok) {
@@ -190,7 +189,7 @@ export default function ReportsPage() {
       anchor.href = url
 
       anchor.download =
-        `liva-${kind}.csv`
+        `liva-${reportKind}.csv`
 
       document.body.appendChild(
         anchor,
@@ -222,32 +221,6 @@ export default function ReportsPage() {
   return (
     <div className="wf-page">
 
-      <header className="wf-nav">
-        <Link
-          to="/projects"
-          className="wf-brand"
-        >
-          Liva.
-        </Link>
-
-        <nav aria-label="Workspace">
-          <Link to="/dashboard">
-            Overview
-          </Link>
-
-          <Link to="/compensation">
-            Compensation
-          </Link>
-
-          <Link to="/rehabilitation">
-            R&R
-          </Link>
-
-          <Link to="/actions">
-            Actions
-          </Link>
-        </nav>
-      </header>
 
 
       <main className="wf-main">
@@ -355,7 +328,7 @@ export default function ReportsPage() {
 
               <select
                 disabled={busy}
-                value={kind}
+                value={reportKind}
                 onChange={
                   (event) =>
                     setKind(
@@ -378,9 +351,9 @@ export default function ReportsPage() {
                   Resettlement
                 </option>
 
-                <option value="litigation">
+                {role === 'landowner' && <option value="litigation">
                   Litigation
-                </option>
+                </option>}
               </select>
             </label>
 
@@ -428,12 +401,12 @@ export default function ReportsPage() {
         </section>
 
 
-        <WorkflowSummary
+        {role === 'landowner' && <WorkflowSummary
           projectId={
             projectId ||
             undefined
           }
-        />
+        />}
 
       </main>
     </div>

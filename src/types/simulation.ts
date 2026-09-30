@@ -81,6 +81,9 @@ export interface SimulationResponse {
 
 
 export interface SimulationHistoryItem {
+  current_prediction?: RiskPrediction | null;
+  simulated_prediction?: RiskPrediction | null;
+  summary?: string | null;
   simulation_id: string;
 
   project_id: string;

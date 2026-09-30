@@ -527,9 +527,7 @@ export default function WhatIfSimulator({
             </h2>
 
             <p className="mt-1 max-w-2xl text-sm text-[#758179]">
-              Adjust temporary workflow
-              values below. Live project
-              records remain unchanged.
+             
             </p>
           </div>
 

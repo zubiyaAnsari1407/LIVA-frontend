@@ -40,10 +40,9 @@ function readStoredRole():
     )
 
   if (
-    stored === 'judge' ||
     stored === 'admin' ||
     stored === 'officer' ||
-    stored === 'analyst'
+    stored === 'landowner'
   ) {
     return stored
   }

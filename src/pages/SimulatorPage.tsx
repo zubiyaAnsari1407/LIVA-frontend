@@ -5,19 +5,11 @@ import {
 } from "react";
 
 import {
-  ArrowLeft,
-  ArrowRight,
-  Building2,
-  ChevronDown,
-  FlaskConical,
-  MapPin,
   Orbit,
-  ShieldCheck,
   TriangleAlert,
 } from "lucide-react";
 
 import {
-  Link,
   useSearchParams,
 } from "react-router";
 
@@ -26,6 +18,7 @@ import {
 } from "motion/react";
 
 import DigitalTwinPanel from "../components/simulation/DigitalTwinPanel";
+import ProjectContextBanner from "../components/project/ProjectContextBanner";
 
 
 type ProjectOption = {
@@ -37,6 +30,7 @@ type ProjectOption = {
 
   sector: string | null;
   line_ministry: string | null;
+  image: string | null;
 
   progress: number | null;
 
@@ -57,38 +51,8 @@ const API_BASE_URL =
   );
 
 
-const UNKNOWN_LOCATION_VALUES = [
-  "",
-  "not specified",
-  "not available",
-  "not specified in paimana export",
-  "unknown",
-];
 
 
-function cleanLocationValue(
-  value:
-    | string
-    | null
-    | undefined,
-) {
-  if (!value) {
-    return null;
-  }
-
-  const cleaned =
-    value.trim();
-
-  if (
-    UNKNOWN_LOCATION_VALUES.includes(
-      cleaned.toLowerCase(),
-    )
-  ) {
-    return null;
-  }
-
-  return cleaned;
-}
 
 
 function normalizeProjects(
@@ -167,6 +131,7 @@ function normalizeProjects(
             record.id ??
             record._id ??
             record.project_id ??
+            record.projectId ??
             "",
           );
 
@@ -183,6 +148,7 @@ function normalizeProjects(
             String(
               record.name ??
               record.project_name ??
+              record.projectName ??
               record.title ??
               "Untitled project",
             ),
@@ -209,6 +175,12 @@ function normalizeProjects(
             typeof record.line_ministry ===
               "string"
               ? record.line_ministry
+              : null,
+
+          image:
+            typeof record.image ===
+              "string"
+              ? record.image
               : null,
 
           progress:
@@ -245,31 +217,6 @@ function normalizeProjects(
         null,
     );
 }
-
-
-function getProjectLocation(
-  project:
-    ProjectOption,
-) {
-  const district =
-    cleanLocationValue(
-      project.district,
-    );
-
-  const state =
-    cleanLocationValue(
-      project.state,
-    );
-
-
-  return [
-    district,
-    state,
-  ]
-    .filter(Boolean)
-    .join(", ");
-}
-
 
 export default function SimulatorPage() {
   const [
@@ -318,10 +265,9 @@ export default function SimulatorPage() {
 
 
   const [
-    projectsError,
-    setProjectsError,
-  ] =
-    useState("");
+  ,
+  setProjectsError,
+] = useState("");
 
 
   // =========================================================
@@ -344,23 +290,20 @@ export default function SimulatorPage() {
         );
 
 
-        const response =
-          await fetch(
-            `${API_BASE_URL}/api/projects`,
-          );
+        const [projectResponse, livaResponse] = await Promise.allSettled([
+          fetch(`${API_BASE_URL}/api/projects`),
+          fetch(`${API_BASE_URL}/api/liva/projects`),
+        ]);
 
-
-        if (
-          !response.ok
-        ) {
-          throw new Error(
-            "Unable to load projects.",
-          );
+        const projectPayload = projectResponse.status === "fulfilled" && projectResponse.value.ok
+          ? await projectResponse.value.json()
+          : [];
+        const livaPayload = livaResponse.status === "fulfilled" && livaResponse.value.ok
+          ? await livaResponse.value.json()
+          : [];
+        if (projectResponse.status === "rejected" && livaResponse.status === "rejected") {
+          throw new Error("Unable to load projects.");
         }
-
-
-        const payload =
-          await response.json();
 
 
         if (!active) {
@@ -368,10 +311,13 @@ export default function SimulatorPage() {
         }
 
 
-        const normalized =
-          normalizeProjects(
-            payload,
-          );
+        const normalized = [
+          ...normalizeProjects(projectPayload),
+          ...normalizeProjects(livaPayload).map((project) => ({
+            ...project,
+            isDemo: false,
+          })),
+        ].filter((project, index, all) => all.findIndex((candidate) => candidate.id === project.id) === index);
 
 
         setProjects(
@@ -427,6 +373,13 @@ export default function SimulatorPage() {
   // SELECTED PROJECT
   // =========================================================
 
+  // If no project is present in the URL, use the first loaded
+  // project as the active project so the selector is always visible.
+  const activeProjectId =
+    selectedProjectId ||
+    projects[0]?.id ||
+    "";
+
   const selectedProject =
     useMemo(
       () =>
@@ -435,21 +388,16 @@ export default function SimulatorPage() {
             project,
           ) =>
             project.id ===
-            selectedProjectId,
+            activeProjectId,
         ),
       [
         projects,
-        selectedProjectId,
+        activeProjectId,
       ],
     );
 
 
-  const selectedLocation =
-    selectedProject
-      ? getProjectLocation(
-          selectedProject,
-        )
-      : "";
+ 
 
 
   const invalidProject =
@@ -515,153 +463,7 @@ export default function SimulatorPage() {
       {/* NAV */}
       {/* ================================================= */}
 
-      <header
-        className="
-          sticky
-          top-0
-          z-40
-          border-b
-          border-white/10
-          bg-[#143f35]
-          text-white
-          shadow-sm
-        "
-      >
-        <div
-          className="
-            mx-auto
-            flex
-            min-h-[72px]
-            max-w-[1500px]
-            items-center
-            justify-between
-            px-5
-            lg:px-8
-          "
-        >
-
-          <div
-            className="
-              flex
-              items-center
-              gap-8
-            "
-          >
-
-            <Link
-              to="/dashboard"
-              className="
-                text-2xl
-                font-bold
-                tracking-[-0.04em]
-              "
-            >
-              Liva.
-            </Link>
-
-
-            <nav
-              className="
-                hidden
-                items-center
-                gap-6
-                text-sm
-                font-medium
-                md:flex
-              "
-            >
-
-              <Link
-                to="/dashboard"
-                className="
-                  text-white/70
-                  transition
-                  hover:text-white
-                "
-              >
-                Overview
-              </Link>
-
-
-              <Link
-                to="/projects"
-                className="
-                  text-white/70
-                  transition
-                  hover:text-white
-                "
-              >
-                Projects
-              </Link>
-
-
-              <Link
-                to={
-                  selectedProjectId
-                    ? `/intelligence?project=${encodeURIComponent(
-                        selectedProjectId,
-                      )}`
-                    : "/intelligence"
-                }
-                className="
-                  text-white/70
-                  transition
-                  hover:text-white
-                "
-              >
-                Intelligence
-              </Link>
-
-
-              <span
-                className="
-                  border-b-2
-                  border-[#d1b66f]
-                  py-6
-                "
-              >
-                Digital Twin
-              </span>
-
-
-              <Link
-                to="/actions"
-                className="
-                  text-white/70
-                  transition
-                  hover:text-white
-                "
-              >
-                Action Centre
-              </Link>
-
-            </nav>
-
-          </div>
-
-
-          <Link
-            to="/dashboard"
-            className="
-              inline-flex
-              items-center
-              gap-2
-              text-sm
-              font-semibold
-              text-white/80
-              transition
-              hover:text-white
-            "
-          >
-            <ArrowLeft
-              size={15}
-            />
-
-            Dashboard
-          </Link>
-
-        </div>
-      </header>
+   
 
 
       <div
@@ -701,585 +503,41 @@ export default function SimulatorPage() {
 
 
         {/* ================================================= */}
-        {/* HERO */}
+        {/* PROJECT CONTEXT */}
         {/* ================================================= */}
 
-        <motion.section
-          initial={{
-            opacity:
-              0,
-
-            y:
-              12,
-          }}
-          animate={{
-            opacity:
-              1,
-
-            y:
-              0,
-          }}
-          transition={{
-            duration:
-              0.4,
-          }}
-          className="
-            relative
-            mt-5
-            overflow-hidden
-            rounded-[30px]
-            bg-[#173f35]
-            px-6
-            py-8
-            text-white
-            shadow-[0_20px_55px_rgba(23,63,53,0.16)]
-            md:px-9
-            md:py-10
-          "
-        >
-
-          <div
-            className="
-              pointer-events-none
-              absolute
-              -right-24
-              -top-32
-              h-96
-              w-96
-              rounded-full
-              border
-              border-white/10
-            "
-          />
-
-
-          <div
-            className="
-              pointer-events-none
-              absolute
-              right-16
-              top-8
-              h-60
-              w-60
-              rounded-full
-              bg-[#d1b66f]/10
-              blur-3xl
-            "
-          />
-
-
-          <div
-            className="
-              relative
-              grid
-              gap-8
-              lg:grid-cols-[1fr_430px]
-              lg:items-end
-            "
-          >
-
-            {/* LEFT */}
-
-            <div>
-
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  text-[#d8c58f]
-                "
-              >
-                <Orbit
-                  size={15}
-                />
-
-                <span
-                  className="
-                    text-[10px]
-                    font-bold
-                    uppercase
-                    tracking-[0.22em]
-                  "
-                >
-                  Model · Intervene · Compare
-                </span>
-              </div>
-
-
-              <h1
-                className="
-                  mt-4
-                  max-w-3xl
-                  text-3xl
-                  font-semibold
-                  leading-tight
-                  tracking-[-0.04em]
-                  md:text-[42px]
-                "
-              >
-                Test interventions
-                <br />
-
-                before taking action.
-              </h1>
-
-
-              <p
-                className="
-                  mt-4
-                  max-w-2xl
-                  text-sm
-                  leading-6
-                  text-white/60
-                "
-              >
-                Build a temporary scenario from the selected
-                project's current LIVA records, modify
-                operational assumptions and compare the
-                resulting risk state.
-              </p>
-
-
-              <div
-                className="
-                  mt-5
-                  flex
-                  flex-wrap
-                  gap-2
-                "
-              >
-
-                <span
-                  className="
-                    inline-flex
-                    items-center
-                    gap-2
-                    rounded-full
-                    border
-                    border-white/10
-                    bg-white/[0.06]
-                    px-3
-                    py-2
-                    text-xs
-                    text-white/65
-                  "
-                >
-                  <ShieldCheck
-                    size={13}
-                    className="
-                      text-[#d8c58f]
-                    "
-                  />
-
-                  Live records unchanged
-                </span>
-
-
-                <span
-                  className="
-                    inline-flex
-                    items-center
-                    gap-2
-                    rounded-full
-                    border
-                    border-white/10
-                    bg-white/[0.06]
-                    px-3
-                    py-2
-                    text-xs
-                    text-white/65
-                  "
-                >
-                  <FlaskConical
-                    size={13}
-                    className="
-                      text-[#d8c58f]
-                    "
-                  />
-
-                  What-if scenario
-                </span>
-
-              </div>
-
-            </div>
-
-
-            {/* =========================================== */}
-            {/* PROJECT SELECTOR */}
-            {/* =========================================== */}
-
-            <div>
-
-              <label
-                className="
-                  text-[10px]
-                  font-bold
-                  uppercase
-                  tracking-[0.17em]
-                  text-[#d8c58f]
-                "
-              >
-                Simulation project
-              </label>
-
-
-              <div
-                className="
-                  relative
-                  mt-2
-                "
-              >
-
-                <select
-                  value={
-                    selectedProjectId
-                  }
-                  disabled={
-                    loadingProjects
-                    ||
-                    Boolean(
-                      projectsError,
-                    )
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    changeProject(
-                      event.target.value,
-                    )
-                  }
-                  className="
-                    w-full
-                    appearance-none
-                    rounded-2xl
-                    border
-                    border-white/15
-                    bg-white/[0.08]
-                    px-4
-                    py-3.5
-                    pr-10
-                    text-sm
-                    font-semibold
-                    text-white
-                    outline-none
-                    backdrop-blur
-                    transition
-                    focus:border-[#d1b66f]/70
-                  "
-                >
-
-                  <option
-                    value=""
-                    className="
-                      text-[#173f35]
-                    "
-                  >
-                    {
-                      loadingProjects
-                        ? (
-                          "Loading projects..."
-                        )
-                        : projectsError
-                          ? (
-                            "Projects unavailable"
-                          )
-                          : (
-                            "Select a project"
-                          )
-                    }
-                  </option>
-
-
-                  {
-                    projects.map(
-                      (
-                        project,
-                      ) => (
-                        <option
-                          key={
-                            project.id
-                          }
-                          value={
-                            project.id
-                          }
-                          className="
-                            text-[#173f35]
-                          "
-                        >
-                          {
-                            project.name
-                          }
-                        </option>
-                      ),
-                    )
-                  }
-
-                </select>
-
-
-                <ChevronDown
-                  size={17}
-                  className="
-                    pointer-events-none
-                    absolute
-                    right-4
-                    top-1/2
-                    -translate-y-1/2
-                    text-white/60
-                  "
-                />
-
-              </div>
-
-
-              {
-                projectsError
-                &&
-                (
-                  <div
-                    className="
-                      mt-3
-                      flex
-                      items-center
-                      gap-2
-                      text-xs
-                      text-[#f1c6ba]
-                    "
-                  >
-                    <TriangleAlert
-                      size={13}
-                    />
-
-                    {
-                      projectsError
-                    }
-                  </div>
-                )
-              }
-
-
-              {
-                selectedProject
-                &&
-                (
-                  <motion.div
-                    initial={{
-                      opacity:
-                        0,
-
-                      y:
-                        5,
-                    }}
-                    animate={{
-                      opacity:
-                        1,
-
-                      y:
-                        0,
-                    }}
-                    className="
-                      mt-3
-                      rounded-xl
-                      border
-                      border-white/10
-                      bg-white/[0.05]
-                      p-3
-                    "
-                  >
-
-                    <div
-                      className="
-                        flex
-                        items-start
-                        gap-2
-                      "
-                    >
-                      <Building2
-                        size={14}
-                        className="
-                          mt-0.5
-                          shrink-0
-                          text-[#d8c58f]
-                        "
-                      />
-
-
-                      <div
-                        className="
-                          min-w-0
-                        "
-                      >
-                        <div
-                          className="
-                            truncate
-                            text-xs
-                            font-semibold
-                            text-white
-                          "
-                        >
-                          {
-                            selectedProject.name
-                          }
-                        </div>
-
-
-                        {
-                          selectedProject.sector
-                          &&
-                          (
-                            <div
-                              className="
-                                mt-1
-                                text-[10px]
-                                text-white/50
-                              "
-                            >
-                              {
-                                selectedProject.sector
-                              }
-                            </div>
-                          )
-                        }
-                      </div>
-                    </div>
-
-
-                    {
-                      selectedLocation
-                      &&
-                      (
-                        <div
-                          className="
-                            mt-2
-                            flex
-                            items-center
-                            gap-2
-                            text-[10px]
-                            text-white/50
-                          "
-                        >
-                          <MapPin
-                            size={12}
-                          />
-
-                          {
-                            selectedLocation
-                          }
-                        </div>
-                      )
-                    }
-
-
-                    {
-                      !selectedLocation
-                      &&
-                      (
-                        <div
-                          className="
-                            mt-2
-                            text-[10px]
-                            text-white/40
-                          "
-                        >
-                          Geographic location not supplied in
-                          the PAIMANA source export.
-                        </div>
-                      )
-                    }
-
-
-                    <div
-                      className="
-                        mt-3
-                        flex
-                        flex-wrap
-                        gap-3
-                        border-t
-                        border-white/10
-                        pt-3
-                      "
-                    >
-
-                      <Link
-                        to={`/projects/${encodeURIComponent(
-                          selectedProject.id,
-                        )}`}
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1
-                          text-[10px]
-                          font-bold
-                          text-white/70
-                          transition
-                          hover:text-white
-                        "
-                      >
-                        Project
-
-                        <ArrowRight
-                          size={11}
-                        />
-                      </Link>
-
-
-                      <Link
-                        to={`/intelligence?project=${encodeURIComponent(
-                          selectedProject.id,
-                        )}`}
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1
-                          text-[10px]
-                          font-bold
-                          text-white/70
-                          transition
-                          hover:text-white
-                        "
-                      >
-                        Intelligence
-
-                        <ArrowRight
-                          size={11}
-                        />
-                      </Link>
-
-
-                      <Link
-                        to="/dashboard#dashboard-map"
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1
-                          text-[10px]
-                          font-bold
-                          text-[#d8c58f]
-                          transition
-                          hover:text-[#ead8a5]
-                        "
-                      >
-                        GIS
-
-                        <ArrowRight
-                          size={11}
-                        />
-                      </Link>
-
-                    </div>
-
-                  </motion.div>
-                )
-              }
-
-            </div>
-
+        {selectedProject && (
+          <div className="mt-5">
+            <ProjectContextBanner
+              project={{
+                id: selectedProject.id,
+                name: selectedProject.name,
+                district: selectedProject.district,
+                state: selectedProject.state,
+                sector: selectedProject.sector,
+                lineMinistry: selectedProject.line_ministry,
+                image: selectedProject.image,
+              }}
+              projects={projects.map((item) => ({
+                id: item.id,
+                name: item.name,
+                district: item.district,
+                state: item.state,
+                sector: item.sector,
+                lineMinistry: item.line_ministry,
+                image: item.image,
+              }))}
+              onProjectChange={changeProject}
+              label="ACTIVE PROJECT"
+            />
           </div>
+        )}
 
-        </motion.section>
+        {/* ================================================= */}
+        {/* SIMULATOR INTRO */}
+        {/* ================================================= */}
 
+        
 
         {/* ================================================= */}
         {/* INVALID PROJECT */}
@@ -1419,7 +677,7 @@ export default function SimulatorPage() {
         {/* ================================================= */}
 
         {
-          !selectedProjectId
+          !activeProjectId
           &&
           !loadingProjects
           &&
@@ -1507,10 +765,11 @@ export default function SimulatorPage() {
                   text-[#748179]
                 "
               >
-                Select one of the current sourced projects.
-                LIVA will establish its operational baseline
-                and allow temporary what-if interventions
-                without changing the live project records.
+                Select one of the current sourced projects
+                from the project banner above. LIVA will
+                establish its operational baseline and allow
+                temporary what-if interventions without
+                changing the live project records.
               </p>
 
             </motion.section>

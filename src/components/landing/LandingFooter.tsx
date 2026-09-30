@@ -15,9 +15,7 @@ const exploreLinks = [
 ]
 
 const aboutLinks = [
-  ['Why Liva', '#why-liva'],
   ['Who it’s for', '#who-its-for'],
-  ['FAQs', '#faqs'],
 ]
 
 

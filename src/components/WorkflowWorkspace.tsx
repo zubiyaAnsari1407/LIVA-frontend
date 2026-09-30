@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
+import { useFlash } from '../context/FlashContext'
 import { Plus, ArrowRight, RefreshCw, X, ExternalLink, PencilLine } from 'lucide-react'
 
 import {
@@ -28,6 +29,10 @@ export type WorkspaceConfig = {
   image?: string
   fields: Field[]
   columns: { key: string; label: string }[]
+  hideParcelField?: boolean
+  hideSourceFields?: boolean
+  hideSelectorNote?: boolean
+  hideResultCount?: boolean
 }
 
 type Row = {
@@ -42,6 +47,7 @@ type Row = {
 type Project = {
   id: string
   name: string
+  isDemo?: boolean
 }
 
 type Parcel = {
@@ -87,6 +93,8 @@ export default function WorkflowWorkspace({
 }: {
   config: WorkspaceConfig
 }) {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { success: flashSuccess, error: flashError } = useFlash()
   const { can } = useAuth()
   const canManageWorkflow = can('workflow.manage')
 
@@ -107,7 +115,7 @@ export default function WorkflowWorkspace({
   const [reload, setReload] = useState(0)
   const [retryParcels, setRetryParcels] = useState(0)
   const [query, setQuery] = useState('')
-  const [projectFilter, setProjectFilter] = useState('')
+  const [projectFilter, setProjectFilter] = useState(() => searchParams.get('projectId') ?? '')
 
   const [selected, setSelected] = useState<Row | null>(null)
   const [draft, setDraft] = useState<Draft>(() => defaults(config))
@@ -122,6 +130,7 @@ export default function WorkflowWorkspace({
   const formRef = useRef<HTMLElement>(null)
   const detailsCloseRef = useRef<HTMLButtonElement>(null)
   const detailsReturnFocusRef = useRef<HTMLElement | null>(null)
+  const sourceRequired = !config.hideSourceFields && draft.isDemo === 'false' && !draft.projectId.startsWith('LIVA-PRJ-')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -160,18 +169,30 @@ export default function WorkflowWorkspace({
     setProjectLoading(true)
     setProjectError('')
 
-    workflowRequest<{ items: Project[] }>('/api/projects', {
-      signal: controller.signal,
-    })
-      .then((data) => {
-        if (!controller.signal.aborted) {
-          setProjects(data.items)
+    Promise.allSettled([
+      workflowRequest<{ items: Project[] }>('/api/projects', { signal: controller.signal }),
+      workflowRequest<unknown[]>('/api/liva/projects', { signal: controller.signal }),
+    ])
+      .then((results) => {
+        if (controller.signal.aborted) return
+        const portfolio = results[0].status === 'fulfilled' ? results[0].value.items : []
+        const liva = results[1].status === 'fulfilled' && Array.isArray(results[1].value) ? results[1].value : []
+        const livaOptions = liva.flatMap((value) => {
+          if (!value || typeof value !== 'object') return []
+          const item = value as Record<string, unknown>
+          return typeof item.projectId === 'string' && typeof item.projectName === 'string'
+            ? [{ id: item.projectId, name: item.projectName, isDemo: item.isDemo === true }]
+            : []
+        })
+        const combined = [...portfolio, ...livaOptions]
+          .filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index)
+        if (results.every((result) => result.status === 'rejected')) {
+          throw new Error('Unable to load project list.')
         }
+        setProjects(combined)
       })
       .catch((error) => {
-        if (!controller.signal.aborted) {
-          setProjectError(workflowError(error))
-        }
+        if (!controller.signal.aborted) setProjectError(workflowError(error))
       })
       .finally(() => {
         if (!controller.signal.aborted) setProjectLoading(false)
@@ -186,7 +207,7 @@ export default function WorkflowWorkspace({
     setParcels([])
     setParcelError('')
 
-    if (!open || !draft.projectId) {
+    if (!open || !draft.projectId || config.hideParcelField) {
       setParcelLoading(false)
       return () => controller.abort()
     }
@@ -210,7 +231,7 @@ export default function WorkflowWorkspace({
       })
 
     return () => controller.abort()
-  }, [draft.projectId, open, retryParcels])
+  }, [draft.projectId, open, retryParcels, config.hideParcelField])
 
   useEffect(() => {
     if (open) formRef.current?.focus()
@@ -272,6 +293,8 @@ export default function WorkflowWorkspace({
       }
     } else {
       fresh.projectId = projectFilter || projects[0]?.id || ''
+      const selectedProject = projects.find((project) => project.id === fresh.projectId)
+      fresh.isDemo = String(selectedProject?.isDemo ?? !fresh.projectId.startsWith('LIVA-PRJ-'))
     }
 
     setDraft(fresh)
@@ -289,7 +312,12 @@ export default function WorkflowWorkspace({
     setDraft((current) => ({
       ...current,
       [key]: value,
-      ...(key === 'projectId' ? { parcelId: '' } : {}),
+      ...(key === 'projectId'
+        ? {
+            parcelId: '',
+            isDemo: String(projects.find((project) => project.id === value)?.isDemo ?? !value.startsWith('LIVA-PRJ-')),
+          }
+        : {}),
     }))
   }
 
@@ -338,12 +366,18 @@ export default function WorkflowWorkspace({
       setSelected(result)
       setOpen(false)
       setDirty(false)
-      setSuccess(
-        editing ? 'Changes saved.' : 'Record created and saved.',
-      )
+
+      const successMessage = editing
+        ? 'Changes saved.'
+        : 'Record created and saved.'
+
+      setSuccess(successMessage)
+      flashSuccess(successMessage)
       setReload((value) => value + 1)
     } catch (error) {
-      setSaveError(workflowError(error))
+      const errorMessage = workflowError(error)
+      setSaveError(errorMessage)
+      flashError(errorMessage)
     } finally {
       lock.current = false
       setSaving(false)
@@ -641,18 +675,7 @@ export default function WorkflowWorkspace({
         }
       `}</style>
 
-      <header className="wf-nav">
-        <Link to="/projects" className="wf-brand">Liva.</Link>
-
-        <nav aria-label="Workspace">
-          <Link to="/dashboard">Overview</Link>
-          <Link to="/projects">Projects</Link>
-          <Link to="/compensation">Compensation</Link>
-          <Link to="/rehabilitation">R&R</Link>
-          <Link to="/actions">Actions</Link>
-          <Link to="/reports">Reports</Link>
-        </nav>
-      </header>
+     
 
       <main className="wf-main">
         <section
@@ -671,10 +694,10 @@ export default function WorkflowWorkspace({
           <p>{config.description}</p>
         </section>
 
-        <p className="wf-note">
+        {/* <p className="wf-note">
           Saved records include demos. Adding a source does not
           independently verify a record.
-        </p>
+        </p> */}
 
         <section className="wf-box">
           <div className="wf-buttons">
@@ -757,7 +780,7 @@ export default function WorkflowWorkspace({
                     </select>
                   </label>
 
-                  <label>
+                  {!config.hideParcelField && <label>
                     Parcel — optional
                     <select
                       value={draft.parcelId}
@@ -781,7 +804,7 @@ export default function WorkflowWorkspace({
                         </option>
                       ))}
                     </select>
-                  </label>
+                  </label>}
 
                   {config.fields.map((field) => (
                     <label
@@ -841,34 +864,34 @@ export default function WorkflowWorkspace({
                       }
                     >
                       <option value="true">Demo — illustrative</option>
-                      <option value="false">Source-backed record</option>
+                      <option value="false">{draft.projectId.startsWith('LIVA-PRJ-') ? 'LIVA workflow record' : 'Source-backed record'}</option>
                     </select>
                   </label>
 
-                  <label>
-                    Source name{draft.isDemo === 'false' ? ' *' : ''}
+                  {!config.hideSourceFields && <label>
+                    Source name{sourceRequired ? ' *' : ''}
                     <input
                       value={draft.sourceName}
                       maxLength={200}
-                      required={draft.isDemo === 'false'}
+                      required={sourceRequired}
                       onChange={(event) =>
                         change('sourceName', event.target.value)
                       }
                     />
-                  </label>
+                  </label>}
 
-                  <label>
-                    Source URL{draft.isDemo === 'false' ? ' *' : ''}
+                  {!config.hideSourceFields && <label>
+                    Source URL{sourceRequired ? ' *' : ''}
                     <input
                       type="url"
                       value={draft.sourceUrl}
-                      required={draft.isDemo === 'false'}
+                      required={sourceRequired}
                       placeholder="https://..."
                       onChange={(event) =>
                         change('sourceUrl', event.target.value)
                       }
                     />
-                  </label>
+                  </label>}
 
                   <label className="wf-wide">
                     Notes / evidence references
@@ -883,17 +906,17 @@ export default function WorkflowWorkspace({
                   </label>
                 </div>
 
-                <p className="wf-note">
+                {!config.hideSelectorNote && <p className="wf-note">
                   Selectors show the latest 100 projects and latest
                   100 parcels for the selected project. Existing
                   links outside that list are preserved.
-                </p>
+                </p>}
 
-                {parcelLoading && (
+                {!config.hideParcelField && parcelLoading && (
                   <p role="status">Loading parcels…</p>
                 )}
 
-                {parcelError && (
+                {!config.hideParcelField && parcelError && (
                   <div className="wf-error" role="alert">
                     <p>{parcelError}</p>
                     <button
@@ -943,8 +966,15 @@ export default function WorkflowWorkspace({
               <select
                 value={projectFilter}
                 onChange={(event) => {
-                  setProjectFilter(event.target.value)
+                  const projectId = event.target.value
+                  setProjectFilter(projectId)
                   setSkip(0)
+                  setSearchParams((current) => {
+                    const next = new URLSearchParams(current)
+                    if (projectId) next.set('projectId', projectId)
+                    else next.delete('projectId')
+                    return next
+                  })
                 }}
               >
                 <option value="">All projects</option>
@@ -965,10 +995,10 @@ export default function WorkflowWorkspace({
             </p>
           ) : (
             <>
-              <p>
+              {!config.hideResultCount && <p>
                 {filtered.length} shown on this page · {total} saved
                 records matching the project filter
-              </p>
+              </p>}
 
               <div className="wf-scroll">
                 <table>
@@ -1164,12 +1194,15 @@ export default function WorkflowWorkspace({
                   </button>
                 )}
 
-                <Link
-                  className="wf-link"
-                  to={`/projects/${selected.projectId}`}
-                >
-                  Open project
-                </Link>
+                {config.endpoint !== '/api/compensation' &&
+                  config.endpoint !== '/api/rehabilitation' && (
+                  <Link
+                    className="wf-link"
+                    to={`/projects/${selected.projectId}`}
+                  >
+                    Open project
+                  </Link>
+                )}
 
                 <button
                   type="button"

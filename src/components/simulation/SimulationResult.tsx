@@ -1,3 +1,4 @@
+import RiskCalculation from "./RiskCalculation";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -5,7 +6,6 @@ import {
   CheckCircle2,
   Database,
   GitCompareArrows,
-  TrendingDown,
 } from "lucide-react";
 import {
   motion,
@@ -250,65 +250,7 @@ export default function SimulationResult({
           </motion.div>
         </div>
 
-        {/* Impact strip */}
-
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-[#e2e8df] p-4">
-            <p className="text-xs text-[#758179]">
-              Risk change
-            </p>
-
-            <p className="mt-1 text-2xl font-semibold text-[#173f35]">
-              {result.score_change > 0
-                ? "+"
-                : ""}
-              {result.score_change.toFixed(
-                1,
-              )}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-[#e2e8df] p-4">
-            <p className="text-xs text-[#758179]">
-              Reduction
-            </p>
-
-            <div className="mt-1 flex items-center gap-2">
-              <TrendingDown
-                size={18}
-                className="text-[#4f7864]"
-              />
-
-              <p className="text-2xl font-semibold text-[#173f35]">
-                {result.risk_reduction_points.toFixed(
-                  1,
-                )}
-              </p>
-            </div>
-
-            <p className="mt-1 text-[10px] text-[#87928b]">
-              risk points
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-[#e2e8df] p-4">
-            <p className="text-xs text-[#758179]">
-              Applied changes
-            </p>
-
-            <p className="mt-1 text-2xl font-semibold text-[#173f35]">
-              {
-                Object.keys(
-                  result.applied_changes,
-                ).length
-              }
-            </p>
-
-            <p className="mt-1 text-[10px] text-[#87928b]">
-              scenario variables
-            </p>
-          </div>
-        </div>
+        <RiskCalculation current={current} simulated={simulated} />
 
         {/* explanation */}
 
@@ -325,7 +267,9 @@ export default function SimulationResult({
               </p>
 
               <p className="mt-1 text-sm leading-6 text-[#4e6158]">
-                {result.summary}
+                {result.direction === 'UNCHANGED'
+                  ? 'Your changes left the risk score the same.'
+                  : `Your changes ${result.direction === 'IMPROVED' ? 'lowered' : 'raised'} the risk score by ${Math.abs(result.score_change).toFixed(2)} points.`}
               </p>
             </div>
           </div>
@@ -340,20 +284,13 @@ export default function SimulationResult({
           />
 
           <p>
-            This is a what-if scenario
-            generated from the current LIVA
-            risk engine and user-selected
-            assumptions. It does not modify
-            the project's live workflow
-            records and should not be treated
-            as a guaranteed future outcome.
+            This is an estimate based on your changes. Your actual project stays unchanged.
           </p>
         </div>
 
         {result.saved && (
           <p className="mt-3 text-[11px] font-medium text-[#567568]">
-            Scenario stored in the LIVA
-            simulation audit trail.
+            Saved in simulation history.
           </p>
         )}
       </div>

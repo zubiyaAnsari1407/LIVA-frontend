@@ -7,6 +7,10 @@ const config: WorkspaceConfig = {
   description:
     'Track recorded approvals, cumulative payments and remaining balances. This workspace records amounts; it does not calculate legal entitlement or execute payments.',
   image: '/images/liva-compensation-banner.png',
+  hideParcelField: true,
+  hideSourceFields: true,
+  hideSelectorNote: true,
+  hideResultCount: true,
 
   fields: [
     {

@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router'
 import {
-  ArrowLeft,
   ArrowRight,
   Plus,
   Scale,
 } from 'lucide-react'
 
 import { useAuth } from '../auth/AuthContext'
+import { useFlash } from '../context/FlashContext'
 
 import '../styles/litigation.css'
 
@@ -23,6 +23,15 @@ const statuses = [
   'Pending',
   'Disposed',
   'Status under verification',
+] as const
+
+const caseTypes = [
+  'Land acquisition dispute',
+  'Compensation dispute',
+  'Ownership dispute',
+  'Title clarification',
+  'Stay / injunction',
+  'Other',
 ] as const
 
 
@@ -46,6 +55,7 @@ type CaseRecord = {
   project: string
   parcelId: string | null
   title: string
+  caseType: string
   reference: string
   court: string
   status: string
@@ -55,6 +65,7 @@ type CaseRecord = {
   notes: string
   isDemo: boolean
   sourceName: string | null
+  sourceRecordId: string | null
   sourceUrl: string | null
 }
 
@@ -63,6 +74,7 @@ type Draft = {
   projectId: string
   parcelId: string
   title: string
+  caseType: string
   reference: string
   court: string
   status: string
@@ -72,6 +84,7 @@ type Draft = {
   notes: string
   isDemo: boolean
   sourceName: string
+  sourceRecordId: string
   sourceUrl: string
 }
 
@@ -80,6 +93,7 @@ const emptyDraft: Draft = {
   projectId: '',
   parcelId: '',
   title: '',
+  caseType: 'Land acquisition dispute',
   reference: '',
   court: '',
   status: 'Status under verification',
@@ -89,6 +103,7 @@ const emptyDraft: Draft = {
   notes: '',
   isDemo: true,
   sourceName: '',
+  sourceRecordId: '',
   sourceUrl: '',
 }
 
@@ -166,6 +181,7 @@ function displayDate(
 
 
 export default function LitigationPage() {
+  const { success: flashSuccess, error: flashError } = useFlash()
   const {
     can,
   } = useAuth()
@@ -554,6 +570,9 @@ export default function LitigationPage() {
             title:
               item.title,
 
+            caseType:
+              item.caseType ?? 'Land acquisition dispute',
+
             reference:
               item.reference,
 
@@ -584,6 +603,10 @@ export default function LitigationPage() {
 
             sourceName:
               item.sourceName ??
+              '',
+
+            sourceRecordId:
+              item.sourceRecordId ??
               '',
 
             sourceUrl:
@@ -661,6 +684,11 @@ export default function LitigationPage() {
           .trim() ||
         null,
 
+      sourceRecordId:
+        draft.sourceRecordId
+          .trim() ||
+        null,
+
       sourceUrl:
         draft.sourceUrl
           .trim() ||
@@ -718,19 +746,17 @@ export default function LitigationPage() {
         false,
       )
 
-      setSuccess(
-        editingId
-          ? 'Case updated.'
-          : 'Case created and saved.',
-      )
+      const successMessage = editingId
+        ? 'Case updated successfully.'
+        : 'Case created successfully.'
+      setSuccess(successMessage)
+      flashSuccess(successMessage)
     } catch (
       error
     ) {
-      setSaveError(
-        message(
-          error,
-        ),
-      )
+      const errorText = message(error)
+      setSaveError(errorText)
+      flashError(errorText)
     } finally {
       saveLock.current =
         false
@@ -923,6 +949,296 @@ export default function LitigationPage() {
           outline-offset:3px;
         }
 
+
+        /* =================================
+           Litigation View Details Modal
+        ================================= */
+
+        .lit-page .lit-modal-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 120;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          background: rgba(20, 35, 30, 0.48);
+          backdrop-filter: blur(3px);
+        }
+
+        .lit-page .lit-details-modal {
+          width: min(700px, 100vw);
+          height: min(570px, calc(100vh - 48px));
+          max-height: calc(100vh - 48px);
+          min-height: 0;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          border: 1px solid #d5dfd1;
+          border-radius: 16px;
+          background: #fbfcfa;
+          box-shadow:
+            0 28px 80px rgba(20, 45, 36, 0.24),
+            0 8px 24px rgba(20, 45, 36, 0.10);
+          animation: litModalIn 0.18s ease-out;
+        }
+
+        @keyframes litModalIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.985);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .lit-page .lit-modal-header {
+          flex: 0 0 auto;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 24px 26px 20px;
+          background: #ffffff;
+          border-bottom: 1px solid #e1e8de;
+        }
+
+        .lit-page .lit-modal-kicker {
+          margin: 0 0 7px;
+          color: #9a7637;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .13em;
+        }
+
+        .lit-page .lit-modal-header h2 {
+          margin: 0;
+          color: #193f36;
+          font-size: 22px;
+          line-height: 1.25;
+        }
+
+        .lit-page .lit-modal-header p:last-child {
+          margin: 6px 0 0;
+          color: #69776f;
+          font-size: 13px;
+          line-height: 1.45;
+        }
+
+        .lit-page .lit-modal-close {
+          width: 36px;
+          height: 36px;
+          flex: 0 0 36px;
+          display: grid;
+          place-items: center;
+          border: 1px solid #d5dfd1;
+          border-radius: 9px;
+          background: #ffffff;
+          color: #53645b;
+          font-size: 23px;
+          line-height: 1;
+          cursor: pointer;
+        }
+
+        .lit-page .lit-modal-close:hover {
+          background: #f3f6f1;
+          color: #193f36;
+        }
+
+        .lit-page .lit-modal-body {
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 22px 26px 24px;
+        }
+
+        .lit-page .lit-modal-status {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 13px 15px;
+          border: 1px solid #dfe7dc;
+          border-radius: 10px;
+          background: #f3f7f1;
+        }
+
+        .lit-page .lit-modal-status span {
+          color: #718078;
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: .07em;
+        }
+
+        .lit-page .lit-modal-status strong {
+          color: #315f4e;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .lit-page .lit-modal-section {
+          margin-top: 22px;
+        }
+
+        .lit-page .lit-modal-section h3 {
+          margin: 0 0 10px;
+          color: #31483e;
+          font-size: 12px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: .05em;
+        }
+
+        .lit-page .lit-modal-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          overflow: hidden;
+          border: 1px solid #e1e8de;
+          border-radius: 10px;
+          background: #ffffff;
+        }
+
+        .lit-page .lit-modal-field {
+          min-width: 0;
+          padding: 13px 15px;
+          border-right: 1px solid #e5ebe2;
+          border-bottom: 1px solid #e5ebe2;
+        }
+
+        .lit-page .lit-modal-field:nth-child(2n) {
+          border-right: 0;
+        }
+
+        .lit-page .lit-modal-field:nth-last-child(-n + 2) {
+          border-bottom: 0;
+        }
+
+        .lit-page .lit-modal-field span {
+          display: block;
+          color: #7b867f;
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: .04em;
+        }
+
+        .lit-page .lit-modal-field strong {
+          display: block;
+          margin-top: 5px;
+          color: #29483d;
+          font-size: 13px;
+          line-height: 1.45;
+          overflow-wrap: anywhere;
+        }
+
+        .lit-page .lit-modal-notes,
+        .lit-page .lit-modal-source {
+          padding: 14px 15px;
+          border: 1px solid #e1e8de;
+          border-radius: 10px;
+          background: #ffffff;
+          color: #596960;
+          font-size: 13px;
+          line-height: 1.55;
+          overflow-wrap: anywhere;
+        }
+
+        .lit-page .lit-modal-source {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+        }
+
+        .lit-page .lit-modal-source a {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          color: #315f4e;
+          font-size: 12px;
+          font-weight: 750;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .lit-page .lit-modal-source a:hover {
+          text-decoration: underline;
+        }
+
+        .lit-page .lit-modal-note {
+          margin-top: 20px;
+          padding: 11px 13px;
+          border: 1px solid #e0e7dc;
+          border-radius: 8px;
+          background: #f6f8f4;
+          color: #758078;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .lit-page .lit-modal-footer {
+          flex: 0 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 9px;
+          padding: 14px 26px;
+          background: #ffffff;
+          border-top: 1px solid #dfe7dc;
+        }
+
+        @media(max-width:640px) {
+          .lit-page .lit-modal-overlay {
+            align-items: flex-end;
+            padding: 0;
+          }
+
+          .lit-page .lit-details-modal {
+            width: 100%;
+            height: min(92vh, 760px);
+            max-height: 92vh;
+            border-radius: 16px 16px 0 0;
+          }
+
+          .lit-page .lit-modal-header,
+          .lit-page .lit-modal-body,
+          .lit-page .lit-modal-footer {
+            padding-left: 18px;
+            padding-right: 18px;
+          }
+
+          .lit-page .lit-modal-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .lit-page .lit-modal-field,
+          .lit-page .lit-modal-field:nth-child(2n) {
+            border-right: 0;
+          }
+
+          .lit-page .lit-modal-field:nth-last-child(-n + 2) {
+            border-bottom: 1px solid #e5ebe2;
+          }
+
+          .lit-page .lit-modal-field:last-child {
+            border-bottom: 0;
+          }
+
+          .lit-page .lit-modal-source {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .lit-page .lit-modal-footer {
+            flex-wrap: wrap;
+          }
+        }
+
         @media(max-width:640px) {
           .lit-page .lc-grid {
             grid-template-columns:
@@ -936,59 +1252,7 @@ export default function LitigationPage() {
       `}</style>
 
 
-      <header className="lit-header">
-
-        <Link
-          to="/"
-          className="lit-brand"
-        >
-          Liva
-          <span>.</span>
-        </Link>
-
-
-        <nav
-          aria-label="
-            Workspace navigation
-          "
-        >
-          <Link to="/dashboard">
-            Overview
-          </Link>
-
-          <Link to="/projects">
-            Projects
-          </Link>
-
-          <Link to="/parcels">
-            Land Parcels
-          </Link>
-
-          <Link to="/documents">
-            Documents
-          </Link>
-
-          <Link
-            to="/litigation"
-            aria-current="page"
-          >
-            Litigation
-          </Link>
-        </nav>
-
-
-        <Link
-          to="/dashboard"
-          className="lit-back"
-        >
-          <ArrowLeft
-            size={16}
-          />
-
-          Dashboard
-        </Link>
-
-      </header>
+    
 
 
       <main className="lit-main">
@@ -1438,6 +1702,28 @@ export default function LitigationPage() {
 
 
                   <label>
+                    Case type
+
+                    <select
+                      required
+                      value={draft.caseType}
+                      onChange={(event) =>
+                        change(
+                          'caseType',
+                          event.target.value,
+                        )
+                      }
+                    >
+                      {caseTypes.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+
+                  <label>
                     Case status
 
                     <select
@@ -1589,6 +1875,23 @@ export default function LitigationPage() {
                               .target
                               .value,
                           )
+                      }
+                    />
+                  </label>
+
+
+                  <label>
+                    Source record ID
+
+                    <input
+                      maxLength={200}
+                      value={draft.sourceRecordId}
+                      placeholder="e.g. LIVA-DEMO-CASE-001"
+                      onChange={(event) =>
+                        change(
+                          'sourceRecordId',
+                          event.target.value,
+                        )
                       }
                     />
                   </label>
@@ -2009,190 +2312,135 @@ export default function LitigationPage() {
         )}
 
 
-        {selected && (
-          <section className="lc-box">
-
-            <h2>
-              {
-                selected
-                  .reference
+        {selected && !formOpen && (
+          <div
+            className="lit-modal-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setSelected(null)
               }
-            </h2>
+            }}
+          >
+            <section
+              className="lit-details-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="lit-details-title"
+            >
+              <header className="lit-modal-header">
+                <div>
+                  <p className="lit-modal-kicker">CASE DETAILS</p>
+                  <h2 id="lit-details-title">{selected.reference}</h2>
+                  <p>{selected.title}</p>
+                </div>
 
-            <h3>
-              {
-                selected
-                  .title
-              }
-            </h3>
-
-
-            <dl className="lc-facts">
-
-              {[
-                [
-                  'Court',
-                  selected.court,
-                ],
-
-                [
-                  'Project',
-                  selected.project,
-                ],
-
-                [
-                  'Parcel ID',
-                  selected.parcelId ||
-                    'Project-level case',
-                ],
-
-                [
-                  'Status',
-                  selected.status,
-                ],
-
-                [
-                  'Filed on',
-                  displayDate(
-                    selected
-                      .filedOn,
-                  ),
-                ],
-
-                [
-                  'Next hearing',
-                  displayDate(
-                    selected
-                      .nextHearing,
-                  ),
-                ],
-
-                [
-                  'Responsible officer',
-                  selected.officer ||
-                    'Not recorded',
-                ],
-
-                [
-                  'Source',
-                  selected.sourceName ||
-                    'Not recorded',
-                ],
-
-                [
-                  'Notes',
-                  selected.notes ||
-                    'Not recorded',
-                ],
-              ].map(
-                ([
-                  label,
-                  value,
-                ]) => (
-                  <div
-                    key={
-                      label
-                    }
-                  >
-                    <dt>
-                      {label}
-                    </dt>
-
-                    <dd>
-                      {value}
-                    </dd>
-                  </div>
-                ),
-              )}
-
-            </dl>
-
-
-            {selected.sourceUrl &&
-              /^https?:\/\//i.test(
-                selected
-                  .sourceUrl,
-              ) && (
-                <p>
-                  <a
-                    href={
-                      selected
-                        .sourceUrl
-                    }
-                    target="_blank"
-                    rel="
-                      noopener
-                      noreferrer
-                    "
-                  >
-                    Open source
-                  </a>
-                </p>
-              )}
-
-
-            <p>
-              Hearing history,
-              order attachments and
-              follow-up tasks are not
-              connected yet. Case
-              duration estimates are
-              unavailable.
-            </p>
-
-
-            <div className="lc-actions">
-
-              {canManageWorkflow && (
                 <button
                   type="button"
-                  className="lc-button"
-                  disabled={
-                    formOpen
-                  }
-                  onClick={() =>
-                    openForm(
-                      selected,
-                    )
-                  }
+                  className="lit-modal-close"
+                  aria-label="Close case details"
+                  onClick={() => setSelected(null)}
                 >
-                  Edit case
+                  ×
                 </button>
-              )}
+              </header>
 
+              <div className="lit-modal-body">
+                <div className="lit-modal-status">
+                  <span>Current status</span>
+                  <strong>{selected.status}</strong>
+                </div>
 
-              <Link
-                to={`/projects/${selected.projectId}`}
-                className="
-                  lc-button
-                  lc-secondary
-                "
-              >
-                Open project
-              </Link>
+                <section className="lit-modal-section">
+                  <h3>Case information</h3>
 
+                  <div className="lit-modal-grid">
+                    {[
+                      ['Case type', selected.caseType || 'Not recorded'],
+                      ['Court', selected.court],
+                      ['Project', selected.project],
+                      [
+                        'Parcel',
+                        selected.parcelId || 'Project-level case',
+                      ],
+                      ['Filed on', displayDate(selected.filedOn)],
+                      ['Next hearing', displayDate(selected.nextHearing)],
+                      [
+                        'Responsible officer',
+                        selected.officer || 'Not recorded',
+                      ],
+                    ].map(([label, value]) => (
+                      <div className="lit-modal-field" key={label}>
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </section>
 
-              <button
-                type="button"
-                className="
-                  lc-button
-                  lc-secondary
-                "
-                onClick={() =>
-                  setSelected(
-                    null,
-                  )
-                }
-              >
-                Close details
-              </button>
+                <section className="lit-modal-section">
+                  <h3>Notes</h3>
+                  <div className="lit-modal-notes">
+                    {selected.notes || 'No notes recorded.'}
+                  </div>
+                </section>
 
-            </div>
+                <section className="lit-modal-section">
+                  <h3>Source</h3>
+                  <div className="lit-modal-source">
+                    <span>
+                      {selected.sourceName || 'Not recorded'}
+                    </span>
 
-          </section>
+                    {selected.sourceUrl &&
+                      /^https?:\/\//i.test(selected.sourceUrl) && (
+                        <a
+                          href={selected.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open source
+                          <ArrowRight size={14} />
+                        </a>
+                      )}
+                  </div>
+                </section>
+
+                <div className="lit-modal-note">
+                  Hearing history, order attachments and follow-up tasks are
+                  not connected yet. Case duration estimates are unavailable.
+                </div>
+              </div>
+
+              <footer className="lit-modal-footer">
+                {canManageWorkflow && (
+                  <button
+                    type="button"
+                    className="lc-button"
+                    onClick={() => openForm(selected)}
+                  >
+                    Edit case
+                  </button>
+                )}
+
+                <Link
+                  to={`/projects/${selected.projectId}`}
+                  className="lc-button lc-secondary"
+                >
+                  Open project
+                </Link>
+
+                <button
+                  type="button"
+                  className="lc-button lc-secondary"
+                  onClick={() => setSelected(null)}
+                >
+                  Close
+                </button>
+              </footer>
+            </section>
+          </div>
         )}
-
-
         <p className="lit-footnote">
           Recorded case information ·
           Banner is illustrative

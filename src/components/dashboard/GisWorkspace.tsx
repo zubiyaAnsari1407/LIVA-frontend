@@ -229,16 +229,6 @@ function projectSearchQuery(project: Project) {
   return name
 }
 
-function topRiskFactor(risk: RiskPrediction | undefined) {
-  if (!risk || !Array.isArray(risk.factors) || risk.factors.length === 0) {
-    return null
-  }
-
-  return [...risk.factors].sort(
-    (a, b) => b.impact_score - a.impact_score,
-  )[0]
-}
-
 function projectPopupLocation(project: Project) {
   const district = cleanText(project.district)
   const state = cleanText(project.state)
@@ -259,7 +249,7 @@ async function getJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export default function GisWorkspace() {
+export default function GisWorkspace({ livaOnly = false }: { livaOnly?: boolean }) {
   const { can } = useAuth()
   const canManageGis = can('gis.manage')
 
@@ -510,7 +500,7 @@ export default function GisWorkspace() {
     })
 
     mapRef.current = map
-    map.addControl(new maplibregl.NavigationControl(), 'top-left')
+    map.addControl(new maplibregl.NavigationControl(), 'bottom-left')
     map.addControl(new maplibregl.FullscreenControl(), 'top-right')
     map.addControl(
       new maplibregl.ScaleControl({ maxWidth: 130, unit: 'metric' }),
@@ -786,11 +776,36 @@ export default function GisWorkspace() {
             getJson<GeoFeatureCollection>('/api/gis/boundaries'),
           ])
 
+        let livaProjects: Project[] = []
+        try {
+          const livaPayload = await getJson<unknown[]>('/api/liva/projects')
+          livaProjects = livaPayload.flatMap((value) => {
+            if (!value || typeof value !== 'object') return []
+            const item = value as Record<string, unknown>
+            if (typeof item.projectId !== 'string' || typeof item.projectName !== 'string') return []
+            return [{
+              id: item.projectId,
+              name: item.projectName,
+              state: typeof item.state === 'string' ? item.state : '',
+              district: typeof item.district === 'string' ? item.district : '',
+              stage: typeof item.status === 'string' ? item.status : '',
+              progress: typeof item.progress === 'number' ? item.progress : null,
+              latitude: typeof item.latitude === 'number' ? item.latitude : null,
+              longitude: typeof item.longitude === 'number' ? item.longitude : null,
+              locationDisplayName: typeof item.locationDisplayName === 'string' ? item.locationDisplayName : null,
+              locationSource: typeof item.locationSource === 'string' ? item.locationSource : null,
+              isDemo: item.isDemo === true,
+            }]
+          })
+        } catch {
+          // Keep the existing GIS layers usable if the LIVA registry is unavailable.
+        }
+
         if (cancelled) {
           return
         }
 
-        setProjects(projectPayload.items ?? [])
+        setProjects([...(livaOnly ? [] : projectPayload.items ?? []), ...livaProjects].filter((item, index, all) => all.findIndex((other) => other.id === item.id) === index))
         setParcels(parcelPayload)
         setBoundaries(boundaryPayload)
       } catch {
@@ -805,7 +820,7 @@ export default function GisWorkspace() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [livaOnly])
 
   useEffect(() => {
     const located = projects.filter(hasCoordinates)
@@ -947,8 +962,6 @@ export default function GisWorkspace() {
         const markerColor = risk
           ? RISK_COLORS[risk.risk_level]
           : UNKNOWN_RISK_COLOR
-        const factor = topRiskFactor(risk)
-        const cleanStage = cleanText(project.stage)
         const displayLocation = projectPopupLocation(project)
 
         const markerButton = document.createElement('button')
@@ -992,12 +1005,9 @@ export default function GisWorkspace() {
           closeOnClick: false,
         }).setHTML(`
           <div style="width:260px;font-family:inherit;padding:2px">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div>
               <span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#9a7227">
                 LIVA PROJECT
-              </span>
-              <span style="padding:4px 8px;border-radius:999px;background:${markerColor}16;color:${markerColor};font-size:9px;font-weight:800">
-                ${escapeHtml(risk?.risk_level ?? 'UNAVAILABLE')}
               </span>
             </div>
 
@@ -1005,54 +1015,12 @@ export default function GisWorkspace() {
               ${escapeHtml(project.name)}
             </div>
 
-            <div style="margin-top:9px;display:grid;gap:6px;font-size:10px;line-height:1.4;color:#677870">
-              <div>
-                <span style="color:#8a9992">Location</span><br/>
-                <strong style="color:#405d54;font-weight:700">
-                  ${escapeHtml(displayLocation)}
-                </strong>
+            <div style="margin-top:9px;font-size:10px;line-height:1.4;color:#677870">
+              <span style="color:#8a9992">Location</span><br/>
+              <strong style="color:#405d54;font-weight:700">
+                ${escapeHtml(displayLocation)}
+              </strong>
               </div>
-
-              ${
-                cleanStage
-                  ? `<div><span style="color:#8a9992">Stage</span><strong style="margin-left:6px;color:#405d54">${escapeHtml(cleanStage)}</strong></div>`
-                  : ''
-              }
-
-              <div>
-                <span style="color:#8a9992">Progress</span>
-                <strong style="margin-left:6px;color:#405d54">
-                  ${
-                    project.progress == null
-                      ? 'Not reported'
-                      : `${project.progress}%`
-                  }
-                </strong>
-              </div>
-            </div>
-
-            <div style="margin-top:11px;padding:9px 10px;border:1px solid #e4ebe7;border-radius:9px;background:#f5f7f4">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px">
-                <span style="color:#718078">Delay risk</span>
-                <strong style="color:${markerColor};font-size:12px">
-                  ${
-                    risk
-                      ? `${risk.risk_score.toFixed(1)}/100`
-                      : 'Unavailable'
-                  }
-                </strong>
-              </div>
-              <div style="margin-top:7px;font-size:9px;color:#87958f">Top factor</div>
-              <div style="margin-top:2px;font-size:10px;line-height:1.35;font-weight:700;color:#405d54">
-                ${escapeHtml(factor?.label ?? 'No major factor')}
-              </div>
-            </div>
-
-            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:11px;padding-top:9px;border-top:1px solid #e5ebe7;font-size:10px;font-weight:700">
-              <a href="/projects/${encodeURIComponent(project.id)}" style="color:#315f53;text-decoration:none">Project →</a>
-              <a href="/intelligence?project=${encodeURIComponent(project.id)}" style="color:#315f53;text-decoration:none">Intelligence →</a>
-              <a href="/simulator?projectId=${encodeURIComponent(project.id)}" style="color:#9a7227;text-decoration:none">Simulator →</a>
-            </div>
           </div>
         `)
 
@@ -1083,7 +1051,7 @@ export default function GisWorkspace() {
         projectMarkersRef.current.push(marker)
         projectPopupMapRef.current.set(project.id, popup)
       })
-  }, [ready, filteredProjects, projectRisks, showProjectMarkers])
+  }, [ready, filteredProjects, projectRisks, showProjectMarkers, livaOnly])
 
   useEffect(() => {
     if (
@@ -1369,30 +1337,18 @@ export default function GisWorkspace() {
     selectedPlace.display_name,
   )
       const response = await fetch(
-        `${API_BASE_URL}/api/projects/${selectedProjectId}`,
+        `${API_BASE_URL}${selectedProjectId.startsWith('LIVA-PRJ-') ? '/api/liva/projects' : '/api/projects'}/${encodeURIComponent(selectedProjectId)}`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-         body:
-  JSON.stringify({
-    latitude:
-      selectedPlace.lat,
-
-    longitude:
-      selectedPlace.lon,
-
-    locationDisplayName:
-      selectedPlace.display_name,
-
-    locationSource:
-      selectedPlace.source,
-
-    state:
-      admin.state,
-
-    district:
-      admin.district,
-  }),
+          body: JSON.stringify({
+            latitude: selectedPlace.lat,
+            longitude: selectedPlace.lon,
+            locationDisplayName: selectedPlace.display_name,
+            locationSource: selectedPlace.source,
+            ...(admin.state ? { state: admin.state } : {}),
+            ...(admin.district ? { district: admin.district } : {}),
+          }),
         },
       )
 
@@ -1401,10 +1357,20 @@ export default function GisWorkspace() {
         throw new Error(body?.detail || 'Location save failed.')
       }
 
-      const updated = (await response.json()) as Project
+      await response.json().catch(() => null)
       setProjects((current) =>
         current.map((project) =>
-          project.id === updated.id ? updated : project,
+          project.id === selectedProjectId
+            ? {
+                ...project,
+                latitude: selectedPlace.lat,
+                longitude: selectedPlace.lon,
+                locationDisplayName: selectedPlace.display_name,
+                locationSource: selectedPlace.source,
+                state: admin.state || project.state,
+                district: admin.district || project.district,
+              }
+            : project,
         ),
       )
 
@@ -1412,8 +1378,9 @@ export default function GisWorkspace() {
       candidateMarkerRef.current = null
       setSelectedPlace(null)
       setCandidateSource(null)
-      setQuery(updated.locationDisplayName || projectSearchQuery(updated))
-      setMessage(`${updated.name} location saved.`)
+      const savedProject = projects.find((project) => project.id === selectedProjectId)
+      setQuery(selectedPlace.display_name || (savedProject ? projectSearchQuery(savedProject) : ''))
+      setMessage(`${savedProject?.name ?? 'Project'} location saved.`)
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -1510,7 +1477,7 @@ export default function GisWorkspace() {
       <div className="gis-toolbar">
         <h2 id="gis-heading">
           <MapPin size={19} aria-hidden="true" />
-          GIS Workspace
+          MAP
         </h2>
 
         <button
@@ -1816,7 +1783,7 @@ export default function GisWorkspace() {
             style={{
               position: 'absolute',
               top: '14px',
-              right: '14px',
+              right: '54px',
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
@@ -1890,7 +1857,7 @@ export default function GisWorkspace() {
               Filters
             </button>
 
-            <button
+            {!livaOnly && <button
               type="button"
               onClick={openLayers}
               style={{
@@ -1910,7 +1877,7 @@ export default function GisWorkspace() {
             >
               <Layers size={14} />
               Layers
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -2066,7 +2033,7 @@ export default function GisWorkspace() {
           </div>
         )}
 
-        {layersOpen && (
+        {!livaOnly && layersOpen && (
           <div
             className="gis-layer-panel"
             style={{

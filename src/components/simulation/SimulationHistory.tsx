@@ -1,3 +1,4 @@
+import RiskCalculation from './RiskCalculation';
 import {
   useEffect,
   useState,
@@ -171,6 +172,23 @@ export default function SimulationHistory({
                   </p>
                 )}
 
+
+                <p className="mt-3 text-sm leading-6 text-[#4e6158]">
+                  {record.direction === 'UNCHANGED'
+                    ? `Risk stayed at ${record.simulated_risk_score.toFixed(2)} out of 100.`
+                    : `Risk ${record.direction === 'IMPROVED' ? 'fell' : 'rose'} from ${record.current_risk_score.toFixed(2)} to ${record.simulated_risk_score.toFixed(2)} out of 100.`}
+                  {' '}Risk level: {record.simulated_risk_level.toLowerCase()}.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#4e6158]">
+                  {Object.keys(record.applied_changes).length
+                    ? `You changed: ${Object.entries(record.applied_changes).map(([key, value]) => `${key.replaceAll('_', ' ')} to ${value}${key === 'completion_percentage' ? '%' : ''}`).join('; ')}.`
+                    : 'No changes were saved in this test.'}
+                  {' '}Your actual project stayed unchanged.
+                </p>
+                {record.current_prediction && record.simulated_prediction ? <details className="mt-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-[#173f35]">Why this score?</summary>
+                  <RiskCalculation current={record.current_prediction} simulated={record.simulated_prediction} />
+                </details> : <p className="mt-2 text-xs text-[#66776e]">This older test has no saved explanation. Run a new test to see the reasons.</p>}
 
                 <p className="mt-3 text-[11px] text-[#87938d]">
                   {new Date(

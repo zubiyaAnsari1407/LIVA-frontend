@@ -64,13 +64,13 @@ export default function DigitalTwinPanel({
                 Intervention Simulation Workspace
               </h2>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">
+              {/* <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">
                 Create a temporary copy of the
                 selected project's operational
                 state and test interventions
                 without modifying real workflow
                 records.
-              </p>
+              </p> */}
             </div>
           </div>
 

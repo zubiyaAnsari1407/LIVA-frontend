@@ -75,6 +75,28 @@ export async function getProjectRiskFeatures(
 }
 
 
+export async function getLivaProjectRisk(
+  projectId: string,
+): Promise<RiskPrediction> {
+  return apiRequest<RiskPrediction>(
+    `${API_BASE_URL}/api/liva/risk-assessments/project/${encodeURIComponent(
+      projectId,
+    )}`,
+  );
+}
+
+
+export async function getLivaProjectRiskFeatures(
+  projectId: string,
+): Promise<RiskFeatures> {
+  return apiRequest<RiskFeatures>(
+    `${API_BASE_URL}/api/liva/risk-assessments/project/${encodeURIComponent(
+      projectId,
+    )}/features`,
+  );
+}
+
+
 // ============================================================
 // Government-trained ML
 // ============================================================

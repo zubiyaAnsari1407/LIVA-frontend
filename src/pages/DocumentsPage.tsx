@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
+import { useFlash } from '../context/FlashContext'
+import { useAuth } from '../auth/AuthContext'
 import {
-  Archive,
-  ArrowLeft,
+  Trash2,
   Check,
   ChevronDown,
   Download,
@@ -31,6 +32,8 @@ type SavedDocument = {
   contentType: string
   isDemo: boolean
   uploadedAt: string
+  isWorkflow?: boolean
+  sourceLabel?: string
 }
 
 type ProjectOption = {
@@ -41,18 +44,13 @@ type ProjectOption = {
 const categories = [
   'Land record',
   'Ownership document',
+  'Identity document',
   'Survey drawing',
+  'Grievance supporting document',
   'Acquisition notice',
   'Compensation record',
   'Court order',
   'Other',
-]
-
-const checklist = [
-  'Land / parcel records',
-  'Ownership references',
-  'Survey documents',
-  'Acquisition notices',
 ]
 
 const MAX_SIZE = 15 * 1024 * 1024
@@ -96,7 +94,16 @@ function isProjectOption(value: unknown): value is ProjectOption {
   return typeof item.id === 'string' && typeof item.name === 'string'
 }
 
+function normalizeLivaProject(value: unknown): ProjectOption | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  return typeof item.projectId === 'string' && typeof item.projectName === 'string'
+    ? { id: item.projectId, name: item.projectName }
+    : null
+}
+
 function fileUrl(item: SavedDocument, download = false) {
+  if (item.isWorkflow) return `${API}/api/liva/documents/${encodeURIComponent(item.id)}`
   return `${API}/api/documents/${encodeURIComponent(item.id)}/file?download=${download}`
 }
 
@@ -108,6 +115,11 @@ async function responseError(response: Response) {
 }
 
 export default function DocumentsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { success: flashSuccess, error: flashError } = useFlash()
+  const { role } = useAuth()
+  const isStaff = role === 'officer' || role === 'admin'
+
   const [documents, setDocuments] = useState<SavedDocument[]>([])
   const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([])
   const [total, setTotal] = useState(0)
@@ -117,12 +129,12 @@ export default function DocumentsPage() {
 
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
-  const [projectFilter, setProjectFilter] = useState('')
+  const [projectFilter, setProjectFilter] = useState(() => searchParams.get('projectId') ?? '')
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [filtersOpen, setFiltersOpen] = useState(true)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
-  const [project, setProject] = useState('')
+  const [project, setProject] = useState(() => searchParams.get('projectId') ?? '')
   const [category, setCategory] = useState(categories[0])
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -152,48 +164,63 @@ export default function DocumentsPage() {
       setLoadError('')
 
       try {
-        const results = await Promise.allSettled([
-          fetch(`${API}/api/documents`, { signal: controller.signal }),
+        const requests: Promise<Response>[] = [
+          fetch(`${API}/api/documents`, { signal: controller.signal, headers: { 'X-Liva-Role': role ?? 'landowner' } }),
           fetch(`${API}/api/projects`, { signal: controller.signal }),
-        ])
+          fetch(`${API}/api/liva/projects`, { signal: controller.signal }),
+        ]
+        if (projectFilter && (role === 'officer' || role === 'admin')) {
+          requests.push(fetch(`${API}/api/documents/workflow?projectId=${encodeURIComponent(projectFilter)}`, {
+            signal: controller.signal,
+            headers: { 'X-Liva-Role': role },
+          }))
+        }
+        const results = await Promise.allSettled(requests)
 
         if (controller.signal.aborted) return
 
-        const [documentResponse, projectResponse] = results
-        if (
-          documentResponse.status === 'rejected' ||
-          projectResponse.status === 'rejected'
-        ) {
-          throw new Error('Unable to reach the API. Check the backend connection.')
-        }
-
-        if (!documentResponse.value.ok) {
-          throw new Error(await responseError(documentResponse.value))
-        }
-        if (!projectResponse.value.ok) {
-          throw new Error(await responseError(projectResponse.value))
-        }
-
-        const [documentData, projectData] = await Promise.all([
-          documentResponse.value.json(),
-          projectResponse.value.json(),
+        const [documentResponse, projectResponse, livaProjectResponse] = results
+        const hasPortfolioProjects = projectResponse.status === 'fulfilled' && projectResponse.value.ok
+        const hasLivaProjects = livaProjectResponse.status === 'fulfilled' && livaProjectResponse.value.ok
+        const [projectData, livaProjectData] = await Promise.all([
+          hasPortfolioProjects ? projectResponse.value.json() : Promise.resolve({ items: [] }),
+          hasLivaProjects ? livaProjectResponse.value.json() : Promise.resolve([]),
         ])
 
+        const portfolioOptions = Array.isArray(projectData?.items)
+          ? projectData.items.filter(isProjectOption)
+          : []
+        const livaOptions = Array.isArray(livaProjectData)
+          ? livaProjectData.map(normalizeLivaProject).filter((item): item is ProjectOption => item !== null)
+          : []
+        const allProjects = [...portfolioOptions, ...livaOptions]
+          .filter((item, index, all) => all.findIndex((other) => other.id === item.id) === index)
+        if (!controller.signal.aborted) setProjectOptions(allProjects)
+
+        if (documentResponse.status === 'rejected') {
+          throw new Error('Unable to reach the documents API. Check the backend connection.')
+        }
+        if (!documentResponse.value.ok) throw new Error(await responseError(documentResponse.value))
+        const documentData = await documentResponse.value.json()
         if (
           !Array.isArray(documentData?.items) ||
           !documentData.items.every(isDocument) ||
           !Number.isInteger(documentData.total) ||
-          documentData.total < documentData.items.length ||
-          !Array.isArray(projectData?.items) ||
-          !projectData.items.every(isProjectOption)
-        ) {
-          throw new Error('Invalid document or project response.')
-        }
+          documentData.total < documentData.items.length
+        ) throw new Error('Invalid document response.')
 
         if (!controller.signal.aborted) {
-          setDocuments(documentData.items)
-          setTotal(documentData.total)
-          setProjectOptions(projectData.items)
+          const workflowResponse = results[3]
+          let workflowItems: SavedDocument[] = []
+          if (workflowResponse?.status === 'fulfilled' && workflowResponse.value.ok) {
+            const workflowData = await workflowResponse.value.json()
+            if (Array.isArray(workflowData?.items)) {
+              workflowItems = workflowData.items.filter(isDocument)
+            }
+          }
+          setDocuments([...documentData.items, ...workflowItems])
+          setTotal(documentData.total + workflowItems.length)
+          if (!allProjects.length) setLoadError('Unable to load project options. Check the backend connection.')
         }
       } catch (err) {
         if (!controller.signal.aborted) {
@@ -206,7 +233,7 @@ export default function DocumentsPage() {
 
     void load()
     return () => controller.abort()
-  }, [reloadKey])
+  }, [reloadKey, role, projectFilter])
 
   useEffect(() => {
     return () => {
@@ -220,21 +247,24 @@ export default function DocumentsPage() {
   }, [])
 
   const ready = !loading && !loadError
-  const filtered = documents.filter((item) => {
-    const term = query.trim().toLowerCase()
-    return (
-      (!term || `${item.name} ${item.project}`.toLowerCase().includes(term)) &&
-      (!categoryFilter || item.category === categoryFilter) &&
-      (!projectFilter || item.projectId === projectFilter)
-    )
-  })
+  const filtered = projectFilter
+    ? documents.filter((item) => {
+        const term = query.trim().toLowerCase()
+        return (
+          item.projectId === projectFilter &&
+          (!term || `${item.name} ${item.project}`.toLowerCase().includes(term)) &&
+          (!categoryFilter || item.category === categoryFilter)
+        )
+      })
+    : []
 
   const hasFilters = Boolean(query || categoryFilter || projectFilter)
-  const totalSize = documents.reduce((sum, item) => sum + item.size, 0)
-
-  const filterProjects = [...new Map(
-    documents.map((item) => [item.projectId, item.project]),
-  )].sort((a, b) => a[1].localeCompare(b[1]))
+  // Show every saved project in the project filter, including projects
+  // that currently have zero documents. This lets the officer select a
+  // project first and then see its document state.
+  const filterProjects = projectOptions
+    .map((item) => [item.id, item.name] as [string, string])
+    .sort((a, b) => a[1].localeCompare(b[1]))
 
   function refresh() {
     setLoading(true)
@@ -245,6 +275,10 @@ export default function DocumentsPage() {
     setQuery('')
     setCategoryFilter('')
     setProjectFilter('')
+    setProject('')
+    const next = new URLSearchParams(searchParams)
+    next.delete('projectId')
+    setSearchParams(next, { replace: true })
   }
 
   function chooseFile(file?: File) {
@@ -284,6 +318,7 @@ export default function DocumentsPage() {
     try {
       const response = await fetch(`${API}/api/documents`, {
         method: 'POST',
+        headers: { 'X-Liva-Role': role ?? 'landowner' },
         body,
       })
 
@@ -295,17 +330,25 @@ export default function DocumentsPage() {
       }
 
       setPendingFile(null)
-      clearFilters()
+      setQuery('')
+      setCategoryFilter('')
+      // Keep the uploaded document's project selected so the workspace
+      // immediately shows documents for that project.
+      setProjectFilter(project)
+      setProject(project)
       setUploadOpen(false)
-      setNotice('Document uploaded and saved.')
+      const successMessage = 'Document uploaded and saved.'
+      setNotice(successMessage)
+      flashSuccess(successMessage)
       addButtonRef.current?.focus()
       refresh()
     } catch (err) {
-      setError(
+      const errorMessage =
         err instanceof TypeError
           ? 'Connection interrupted. Refresh the list before retrying to avoid duplicate uploads.'
-          : err instanceof Error ? err.message : 'Upload failed.',
-      )
+          : err instanceof Error ? err.message : 'Upload failed.'
+      setError(errorMessage)
+      flashError(errorMessage)
     } finally {
       savingRef.current = false
       setSaving(false)
@@ -340,6 +383,7 @@ export default function DocumentsPage() {
        */
       const response = await fetch(fileUrl(item, false), {
         signal: controller.signal,
+        headers: { 'X-Liva-Role': role ?? 'landowner' },
       })
 
       if (!response.ok) {
@@ -372,6 +416,23 @@ export default function DocumentsPage() {
     previewRef.current?.close()
   }
 
+  async function downloadDocument(item: SavedDocument) {
+    try {
+      const response = await fetch(fileUrl(item, true), { headers: { 'X-Liva-Role': role ?? 'landowner' } })
+      if (!response.ok) throw new Error(await responseError(response))
+      const url = URL.createObjectURL(await response.blob())
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = item.name
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Download failed.'
+      setNotice(message)
+      flashError(message)
+    }
+  }
+
   function clearPreview() {
     previewAbortRef.current?.abort()
     previewAbortRef.current = null
@@ -395,17 +456,21 @@ export default function DocumentsPage() {
     try {
       const response = await fetch(
         `${API}/api/documents/${encodeURIComponent(archiveTarget.id)}`,
-        { method: 'DELETE' },
+        { method: 'DELETE', headers: { 'X-Liva-Role': role ?? 'landowner' } },
       )
 
       if (!response.ok) throw new Error(await responseError(response))
 
       archiveRef.current?.close()
       setArchiveTarget(null)
-      setNotice('Document archived. Its stored file is preserved.')
+      const successMessage = 'Document deleted from the active list.'
+      setNotice(successMessage)
+      flashSuccess(successMessage)
       refresh()
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : 'Archive failed.')
+      const errorMessage = err instanceof Error ? err.message : 'Document delete failed.'
+      setNotice(errorMessage)
+      flashError(errorMessage)
       archiveRef.current?.close()
     } finally {
       archivingRef.current = false
@@ -417,19 +482,7 @@ export default function DocumentsPage() {
     <div className="docs-page">
       <a className="docs-skip" href="#docs-main">Skip to documents</a>
 
-      <header className="docs-header">
-        <Link to="/" className="docs-brand">Liva<span>.</span></Link>
-        <nav aria-label="Workspace navigation">
-          <Link to="/dashboard">Overview</Link>
-          <Link to="/projects">Projects</Link>
-          <Link to="/parcels">Land Parcels</Link>
-          <Link to="/documents" aria-current="page">Documents</Link>
-        </nav>
-        <Link to="/dashboard" className="docs-back">
-          <ArrowLeft size={16} aria-hidden="true" /> Dashboard
-        </Link>
-      </header>
-
+    
       <main id="docs-main" className="docs-main">
         <div className="docs-breadcrumb">
           <Link to="/dashboard">Workspace</Link><span>/</span>
@@ -450,18 +503,6 @@ export default function DocumentsPage() {
               Organize project paperwork and review documents in one clear workspace.
             </p>
           </div>
-          <button
-            ref={addButtonRef}
-            type="button"
-            className="docs-primary"
-            disabled={saving}
-            aria-expanded={uploadOpen}
-            aria-controls="docs-upload"
-            onClick={() => setUploadOpen((open) => !open)}
-          >
-            {uploadOpen ? <X size={17} /> : <Plus size={17} />}
-            {uploadOpen ? 'Close panel' : 'Upload document'}
-          </button>
         </section>
 
         <div className="docs-session-note">
@@ -469,20 +510,7 @@ export default function DocumentsPage() {
           <p>Uploaded files are saved. Uploading does not verify their contents.</p>
         </div>
 
-        <section className="docs-stats" aria-label="Loaded document summary">
-          {[
-            { title: 'Documents loaded', value: String(documents.length), note: 'Latest 100 active documents' },
-            { title: 'Linked projects', value: String(filterProjects.length), note: 'Across loaded documents' },
-            { title: 'Loaded file size', value: formatSize(totalSize), note: 'Combined size of loaded records' },
-          ].map((item) => (
-            <article key={item.title}>
-              <p>{item.title}</p>
-              <strong>{ready ? item.value : '—'}</strong>
-              <span>{item.note}</span>
-            </article>
-          ))}
-        </section>
-
+        {isStaff && (
         <div
           id="docs-upload"
           className={`docs-upload-wrapper ${uploadOpen ? 'is-open' : ''}`}
@@ -553,7 +581,14 @@ export default function DocumentsPage() {
                       required
                       disabled={!ready || saving}
                       value={project}
-                      onChange={(event) => setProject(event.target.value)}
+                      onChange={(event) => {
+                        const projectId = event.target.value
+                        setProject(projectId)
+                        const next = new URLSearchParams(searchParams)
+                        if (projectId) next.set('projectId', projectId)
+                        else next.delete('projectId')
+                        setSearchParams(next, { replace: true })
+                      }}
                     >
                       <option value="">Select a project</option>
                       {projectOptions.map((item) => (
@@ -591,6 +626,7 @@ export default function DocumentsPage() {
             </section>
           </div>
         </div>
+        )}
 
         {notice && (
           <div className="docs-notice" role="status">
@@ -609,6 +645,18 @@ export default function DocumentsPage() {
                 <p>Find, preview and download saved files.</p>
               </div>
               <div className="docs-toolbar-actions">
+                {isStaff && <button
+                  ref={addButtonRef}
+                  type="button"
+                  className="docs-primary"
+                  disabled={saving}
+                  aria-expanded={uploadOpen}
+                  aria-controls="docs-upload"
+                  onClick={() => setUploadOpen((open) => !open)}
+                >
+                  {uploadOpen ? <X size={17} /> : <Plus size={17} />}
+                  {uploadOpen ? 'Close panel' : 'Upload document'}
+                </button>}
                 <button
                   type="button"
                   className="docs-filter-button"
@@ -648,11 +696,30 @@ export default function DocumentsPage() {
                       onChange={(event) => setQuery(event.target.value)}
                     />
                   </label>
-                  <select aria-label="Project filter" value={projectFilter} onChange={(event) => setProjectFilter(event.target.value)}>
-                    <option value="">All projects</option>
-                    {filterProjects.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+                  <select
+                    aria-label="Project filter"
+                    value={projectFilter}
+                    onChange={(event) => {
+                      const value = event.target.value
+                      setProjectFilter(value)
+                      setProject(value)
+                      const next = new URLSearchParams(searchParams)
+                      if (value) next.set('projectId', value)
+                      else next.delete('projectId')
+                      setSearchParams(next, { replace: true })
+                    }}
+                  >
+                    <option value="">Select a project</option>
+                    {filterProjects.map(([id, name]) => (
+                      <option key={id} value={id}>{name}</option>
+                    ))}
                   </select>
-                  <select aria-label="Category filter" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+                  <select
+                    aria-label="Category filter"
+                    value={categoryFilter}
+                    disabled={!projectFilter}
+                    onChange={(event) => setCategoryFilter(event.target.value)}
+                  >
                     <option value="">All categories</option>
                     {categories.map((name) => <option key={name}>{name}</option>)}
                   </select>
@@ -663,7 +730,9 @@ export default function DocumentsPage() {
             <div className="docs-result-bar">
               <p role="status">
                 {loading ? 'Loading…' : loadError ? 'Unable to load records'
-                  : `${filtered.length} shown · ${documents.length} loaded · ${total} active`}
+                  : !projectFilter
+                    ? 'Select a project to view its documents'
+                    : `${filtered.length} shown · ${documents.length} loaded · ${total} active`}
               </p>
               {hasFilters && <button type="button" onClick={clearFilters}>Clear filters</button>}
               <button type="button" disabled={loading || saving} onClick={refresh}>Refresh</button>
@@ -672,11 +741,20 @@ export default function DocumentsPage() {
             <div className="docs-results" key={view}>
               {loadError && <p className="docs-error" role="alert">{loadError}</p>}
 
-              {ready && (filtered.length === 0 ? (
+              {ready && (!projectFilter || filtered.length === 0 ? (
                 <div className="docs-empty">
                   <span className="docs-empty-icon"><FolderOpen size={35} /></span>
-                  <h3>{documents.length ? 'No matching documents.' : 'No documents uploaded yet.'}</h3>
-                  <p>Upload a file and link it to a saved project.</p>
+                  {!projectFilter ? (
+                    <>
+                      <h3>Select a project to view documents.</h3>
+                      <p>Select a project from the filter above to view and upload its documents.</p>
+                    </>
+                  ) : (
+                    <>
+                      <h3>No documents available.</h3>
+                      <p>{isStaff ? <>No documents have been uploaded for this project yet. Use <strong>Upload document</strong> to add the first record.</> : 'No documents are currently available for this project.'}</p>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className={`docs-items ${view === 'list' ? 'docs-items-list' : ''}`}>
@@ -688,14 +766,10 @@ export default function DocumentsPage() {
                         onClick={() => previewDocument(item)}
                         aria-label={`Preview ${item.name}`}
                       >
-                        {item.contentType.startsWith('image/') ? (
-                          <img src={fileUrl(item)} alt="" loading="lazy" />
-                        ) : (
-                          <span className="docs-pdf-symbol">
-                            <FileText size={35} strokeWidth={1.4} />
-                            <strong>PDF</strong>
-                          </span>
-                        )}
+                        <span className="docs-pdf-symbol">
+                          <FileText size={35} strokeWidth={1.4} />
+                          <strong>{item.contentType.startsWith('image/') ? 'IMAGE' : 'PDF'}</strong>
+                        </span>
                       </button>
 
                       <div className="docs-item-copy">
@@ -703,7 +777,7 @@ export default function DocumentsPage() {
                         <h3 title={item.name}>{item.name}</h3>
                         <p>{item.project}</p>
                         <small>
-                          {formatSize(item.size)} · {item.isDemo ? 'Demo project' : 'Unverified upload'}
+                          {formatSize(item.size)} · {item.sourceLabel ?? (item.isDemo ? 'Demo project' : 'Unverified upload')}
                         </small>
                       </div>
 
@@ -711,19 +785,20 @@ export default function DocumentsPage() {
                         <button type="button" onClick={() => previewDocument(item)}>
                           <Eye size={15} aria-hidden="true" /> Preview
                         </button>
-                        <a href={fileUrl(item, true)}>
+                        <button type="button" onClick={() => void downloadDocument(item)}>
                           <Download size={15} aria-hidden="true" /> Download
-                        </a>
-                        <button
+                        </button>
+                        {isStaff && <button
                           type="button"
-                          aria-label={`Archive ${item.name}`}
+                          aria-label={`Delete ${item.name}`}
+                          title="Delete document"
                           onClick={() => {
                             setArchiveTarget(item)
                             archiveRef.current?.showModal()
                           }}
                         >
-                          <Archive size={15} />
-                        </button>
+                          <Trash2 size={15} />
+                        </button>}
                       </div>
                     </article>
                   ))}
@@ -732,29 +807,6 @@ export default function DocumentsPage() {
             </div>
           </section>
 
-          <aside className="docs-checklist">
-            <div className="docs-checklist-heading">
-              <FileText size={19} aria-hidden="true" />
-              <h2>Document checklist</h2>
-            </div>
-            <div className="docs-checklist-body">
-              <p className="docs-eyebrow">PROJECT REQUIREMENTS</p>
-              <h3>Know what is needed.</h3>
-              <p>Required documents depend on the project and acquisition stage.</p>
-              <ul>
-                {checklist.map((item, index) => (
-                  <li key={item}>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
-                    <div><strong>{item}</strong><small>Requirement not assessed</small></div>
-                  </li>
-                ))}
-              </ul>
-              <div className="docs-checklist-note">
-                <ShieldCheck size={18} aria-hidden="true" />
-                <p>Uploading a file does not verify it or complete a requirement.</p>
-              </div>
-            </div>
-          </aside>
         </div>
       </main>
 
@@ -863,17 +915,19 @@ export default function DocumentsPage() {
         }}
       >
         <div className="docs-preview-heading">
-          <h2 id="docs-archive-title">Archive document?</h2>
+          <h2 id="docs-archive-title">Delete document?</h2>
         </div>
         <div style={{ padding: 24 }}>
           <p>{archiveTarget?.name}</p>
-          <p>The file will leave the active list. Its stored copy is preserved.</p>
+          <p>{archiveTarget?.isWorkflow
+            ? 'The document will be removed from the active list. Its attachment will no longer open from the original request or grievance.'
+            : 'The document will be removed from the active list.'}</p>
           <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
             <button className="docs-secondary" type="button" disabled={archiving} onClick={() => archiveRef.current?.close()}>
               Cancel
             </button>
             <button className="docs-primary" type="button" disabled={archiving} onClick={() => void archiveDocument()}>
-              {archiving ? 'Archiving…' : 'Archive'}
+              {archiving ? 'Deleting…' : 'Delete'}
             </button>
           </div>
         </div>

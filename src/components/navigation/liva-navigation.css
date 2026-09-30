@@ -1,0 +1,501 @@
+.liva-navigation {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background: #123f35;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 18px rgba(15, 45, 38, 0.08);
+}
+
+.liva-navigation-inner {
+  width: 100%;
+  min-height: 70px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* BRAND */
+.liva-navigation-brand {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.liva-logo-window {
+  display: block;
+  width: 110px;
+  height: 43px;
+  overflow: hidden;
+  position: relative;
+}
+
+.liva-logo-window img {
+  position: absolute;
+  width: 162px;
+  max-width: none;
+  left: -27px;
+  top: 50%;
+  transform: translateY(-50%);
+  filter: brightness(0) invert(1);
+}
+/* DESKTOP NAV */
+
+.liva-desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.liva-nav-link {
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  padding: 24px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.liva-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.liva-nav-link.active {
+  color: #ffffff;
+}
+
+.liva-nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 2px;
+  background: #d2ad69;
+}
+
+/* DROPDOWN */
+
+.liva-nav-group {
+  position: relative;
+}
+
+.liva-nav-group .liva-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.liva-chevron {
+  transition: transform 160ms ease;
+}
+
+.liva-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+.liva-dropdown {
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 0;
+  min-width: 235px;
+  padding: 8px;
+  border: 1px solid #d9e3dd;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 45px rgba(15, 45, 38, 0.15),
+    0 3px 10px rgba(15, 45, 38, 0.06);
+}
+
+.liva-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #29443b;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.liva-dropdown-item:hover {
+  background: #f1f6f3;
+  color: #123f35;
+}
+
+.liva-dropdown-item.active {
+  background: #eaf3ef;
+  color: #123f35;
+}
+
+/* RIGHT ACTIONS */
+
+.liva-navigation-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.liva-search-button {
+  width: 220px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.68);
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+
+.liva-search-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.liva-icon-button,
+.liva-profile-button {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+}
+
+.liva-icon-button:hover,
+.liva-profile-button:hover {
+  background: rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+}
+
+/* MOBILE */
+
+.liva-mobile-button {
+  display: none;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.liva-mobile-menu {
+  display: none;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1180px) {
+  .liva-navigation-inner {
+    padding: 0 18px;
+    gap: 12px;
+  }
+
+  .liva-desktop-nav {
+    gap: 0;
+  }
+
+  .liva-nav-link {
+    padding-left: 7px;
+    padding-right: 7px;
+    font-size: 12px;
+  }
+
+  .liva-search-button {
+    width: 170px;
+  }
+}
+
+@media (max-width: 980px) {
+  .liva-desktop-nav {
+    display: none;
+  }
+
+  .liva-navigation-actions {
+    margin-left: auto;
+  }
+
+  .liva-search-button {
+    display: none;
+  }
+
+  .liva-mobile-button {
+    display: flex;
+  }
+
+  .liva-mobile-menu {
+    display: block;
+    padding: 10px 18px 18px;
+    background: #123f35;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+  }
+
+  .liva-mobile-main-link,
+  .liva-mobile-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .liva-mobile-main-link:hover,
+  .liva-mobile-link:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+  }
+
+  .liva-mobile-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+
+  .liva-mobile-group {
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .liva-mobile-group-title {
+    padding: 8px 11px 5px;
+    color: #d2ad69;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 600px) {
+  .liva-navigation-inner {
+    min-height: 62px;
+    padding: 0 13px;
+  }
+
+  .liva-brand-name {
+    font-size: 18px;
+  }
+
+  .liva-brand-logo {
+    width: 31px;
+    height: 31px;
+  }
+
+  .liva-icon-button,
+  .liva-profile-button {
+    display: none;
+  }
+}
+
+/* =========================================================
+   Hide old page-specific navigation bars.
+   LIVA now uses one common navigation from App.tsx.
+   ========================================================= */
+
+/* Hide only the old Dashboard navigation */
+.liva-page-content
+  .enterprise-dashboard
+  > .enterprise-header {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .liva-logout-button { display: none; }
+}
+
+/* =========================================================
+   PROJECT LOCATION MAP
+   ========================================================= */
+
+.dt-location-card {
+  margin-top: 20px;
+  padding: 25px;
+  border: 1px solid #dfe7e2;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow:
+    0 5px 20px rgba(31, 53, 44, 0.045);
+}
+
+.dt-location-map {
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  margin-top: 18px;
+  border: 1px solid #dfe7e2;
+  border-radius: 13px;
+  background: #eef4f0;
+}
+
+.dt-location-map iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+.dt-location-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 13px;
+  padding: 13px 14px;
+  border: 1px solid #e2e9e5;
+  border-radius: 10px;
+  background: #f7faf8;
+}
+
+.dt-location-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: #39735e;
+}
+
+.dt-location-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dt-location-info strong {
+  color: #173f35;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dt-location-info span {
+  color: #74817b;
+  font-size: 11px;
+}
+
+.dt-location-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 8px 11px;
+  border: 1px solid #d2dfd8;
+  border-radius: 8px;
+  color: #245d4a;
+  background: #ffffff;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dt-location-open:hover {
+  background: #eef5f1;
+}
+
+.dt-location-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 100px;
+  padding: 18px;
+  border: 1px dashed #ccdcd4;
+  border-radius: 11px;
+  color: #557468;
+  background: #f7faf8;
+}
+
+.dt-location-empty div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dt-location-empty strong {
+  color: #173f35;
+  font-size: 13px;
+}
+
+.dt-location-empty span {
+  color: #78857e;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .dt-location-map {
+    height: 280px;
+  }
+
+  .dt-location-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dt-location-open {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================================================
+   LIVA COMMON NAVIGATION
+   Hide old page-specific navigation bars
+   ========================================================= */
+
+/* Project Lens */
+.liva-page-content .pl-page > .pl-header {
+  display: none !important;
+}
+
+/* Common old workspace headers used by individual pages */
+.liva-page-content > header:not(.liva-navigation),
+.liva-page-content > .page-header,
+.liva-page-content > .workspace-header,
+.liva-page-content > .app-header {
+  display: none !important;
+}
+
+/* Dashboard old navbar only */
+.liva-page-content
+  .enterprise-dashboard
+  > .enterprise-header {
+  display: none !important;
+}

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import { Image as ImageIcon, Pencil, Plus, Trash2, Upload, X } from 'lucide-react'
 
 import { useAuth } from '../auth/AuthContext'
+import { useFlash } from '../context/FlashContext'
 import '../styles/project-form.css'
 
 type EditableProject = {
@@ -130,6 +131,7 @@ export default function ProjectForm({
 }) {
   const navigate = useNavigate()
   const { can } = useAuth()
+  const { success: flashSuccess, error: flashError } = useFlash()
 
   const dialogRef = useRef<HTMLDialogElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -343,8 +345,10 @@ export default function ProjectForm({
       dialogRef.current?.close()
 
       if (project) {
+        flashSuccess('Project updated successfully.')
         onSaved?.()
       } else {
+        flashSuccess('Project created successfully.')
         navigate(`/projects/${encodeURIComponent(result.id)}`)
       }
     } catch (err) {
@@ -352,13 +356,15 @@ export default function ProjectForm({
         await cleanupUploadedImage(base, uploadedPublicId)
       }
 
-      setError(
+      const message =
         err instanceof TypeError
           ? 'Connection interrupted. Check the Projects list before retrying to avoid duplicates.'
           : err instanceof Error
             ? err.message
-            : 'Unable to save the project.',
-      )
+            : 'Unable to save the project.'
+
+      setError(message)
+      flashError(message)
     } finally {
       submitting.current = false
       setSaving(false)

@@ -1,4 +1,8 @@
-import { useEffect } from "react";
+import {
+  useEffect,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 
 import {
   BrowserRouter,
@@ -8,14 +12,16 @@ import {
   useLocation,
 } from "react-router";
 
-import {
-  AuthProvider,
-} from "./auth/AuthContext";
-
+import { AuthProvider } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
+
+import LivaNavigation from "./components/navigation/LivaNavigation";
+
+import { FlashProvider } from "./context/FlashContext";
 
 import LandingPage from "./pages/LandingPage";
 import AccessPage from "./pages/AccessPage";
+import LoginPage from "./pages/LoginPage";
 
 import DashboardPage from "./pages/DashboardPage";
 import ProjectsPage from "./pages/ProjectsPage";
@@ -30,6 +36,7 @@ import IntelligencePage from "./pages/IntelligencePage";
 import SimulatorPage from "./pages/SimulatorPage";
 import ReportsPage from "./pages/ReportsPage";
 import RehabilitationPage from "./pages/RehabilitationPage";
+import DigitalTwinPage from "./pages/DigitalTwinPage";
 
 
 function RouteScroll() {
@@ -39,286 +46,414 @@ function RouteScroll() {
   } = useLocation();
 
   useEffect(() => {
-    const frame =
-      requestAnimationFrame(() => {
-        if (hash) {
-          const target =
-            document.getElementById(
-              hash.slice(1),
-            );
+    const frame = requestAnimationFrame(() => {
+      if (hash) {
+        const target =
+          document.getElementById(
+            hash.slice(1),
+          );
 
-          if (target) {
-            target.scrollIntoView({
-              behavior:
-                window.matchMedia(
-                  "(prefers-reduced-motion: reduce)",
-                ).matches
-                  ? "auto"
-                  : "smooth",
+        if (target) {
+          target.scrollIntoView({
+            behavior:
+              window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+              ).matches
+                ? "auto"
+                : "smooth",
+            block: "start",
+          });
 
-              block: "start",
-            });
-
-            return;
-          }
+          return;
         }
+      }
 
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "instant",
-        });
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "instant",
       });
+    });
 
     return () =>
-      cancelAnimationFrame(
-        frame,
-      );
-  }, [
-    pathname,
-    hash,
-  ]);
+      cancelAnimationFrame(frame);
+  }, [pathname, hash]);
 
   return null;
 }
 
 
+/*
+|--------------------------------------------------------------------------|
+| Common Navigation Layout
+|--------------------------------------------------------------------------|
+*/
+
+function ProtectedLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <>
+      <LivaNavigation />
+
+      <div className="liva-page-content">
+        {children}
+      </div>
+    </>
+  );
+}
+
+
+/*
+|--------------------------------------------------------------------------|
+| Protected Page Wrapper
+|--------------------------------------------------------------------------|
+*/
+
+type LivaPermission =
+  ComponentProps<typeof ProtectedRoute>["permission"];
+
+function ProtectedPage({
+  permission,
+  role,
+  children,
+}: {
+  permission: LivaPermission;
+  role?: 'admin' | 'officer' | 'landowner';
+  children: ReactNode;
+}) {
+  return (
+    <ProtectedRoute permission={permission} role={role}>
+      <ProtectedLayout>
+        {children}
+      </ProtectedLayout>
+    </ProtectedRoute>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------|
+| App
+|--------------------------------------------------------------------------|
+*/
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <RouteScroll />
 
-        <Routes>
+        <FlashProvider>
 
-          {/* ========================= */}
-          {/* PUBLIC ROUTES */}
-          {/* ========================= */}
+          <RouteScroll />
 
-          {/* Landing Page */}
-          <Route
-            path="/"
-            element={
-              <LandingPage />
-            }
-          />
+          <Routes>
 
-          {/* Role Access Page */}
-          <Route
-            path="/access"
-            element={
-              <AccessPage />
-            }
-          />
+            {/* ===================================================== */}
+            {/* PUBLIC ROUTES */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/"
+              element={<LandingPage />}
+            />
+
+            <Route
+              path="/access"
+              element={<AccessPage />}
+            />
 
 
-          {/* ========================= */}
-          {/* DASHBOARD */}
-          {/* ========================= */}
-
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute
-                permission="dashboard.view"
-              >
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/login"
+              element={<LoginPage />}
+            />
 
 
-          {/* ========================= */}
-          {/* PROJECTS */}
-          {/* ========================= */}
+            {/* ===================================================== */}
+            {/* DASHBOARD */}
+            {/* ===================================================== */}
 
-          <Route
-            path="/projects"
-            element={
-              <ProtectedRoute
-                permission="projects.view"
-              >
-                <ProjectsPage />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedPage
+                  permission="dashboard.view"
+                >
+                  <DashboardPage />
+                </ProtectedPage>
+              }
+            />
 
-          <Route
-            path="/projects/preview"
-            element={
-              <ProtectedRoute
-                permission="projects.view"
-              >
+            <Route
+              path="/admin/approval"
+              element={
+                <ProtectedPage permission="dashboard.view" role="admin">
+                  <DashboardPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/officer/grievances"
+              element={<ProtectedPage permission="dashboard.view"><DashboardPage /></ProtectedPage>}
+            />
+            <Route path="/officer/projects" element={<ProtectedPage permission="projects.view"><DashboardPage /></ProtectedPage>} />
+            <Route path="/officer/projects/:projectId/:tab?" element={<ProtectedPage permission="projects.view"><DashboardPage /></ProtectedPage>} />
+
+            <Route
+              path="/landowner/projects"
+              element={
+                <ProtectedPage permission="dashboard.view">
+                  <DashboardPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/landowner/requests"
+              element={
+                <ProtectedPage permission="dashboard.view">
+                  <DashboardPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/landowner/tracking/:section?"
+              element={
+                <ProtectedPage permission="dashboard.view">
+                  <DashboardPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route path="/landowner/requests/new" element={<ProtectedPage permission="dashboard.view"><DashboardPage /></ProtectedPage>} />
+            <Route path="/landowner/requests/:requestId/edit" element={<ProtectedPage permission="dashboard.view"><DashboardPage /></ProtectedPage>} />
+
+            <Route
+              path="/landowner/projects/:projectId/:tab?"
+              element={
+                <ProtectedPage
+                  permission="dashboard.view"
+                >
+                  <DashboardPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* PROJECTS */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/projects"
+              element={
+                <ProtectedPage
+                  permission="projects.view"
+                >
+                  <ProjectsPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/projects/preview"
+              element={
+                <ProtectedPage
+                  permission="projects.view"
+                >
+                  <Navigate
+                    to="/projects/demo"
+                    replace
+                  />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/projects/:projectId"
+              element={
+                <ProtectedPage
+                  permission="projects.view"
+                >
+                  <ProjectLensPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* ACQUISITION WORKFLOW */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/parcels"
+              element={
+                <ProtectedPage
+                  permission="workflow.view"
+                >
+                  <ParcelsPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/ownership-survey"
+              element={
+                <ProtectedPage
+                  permission="workflow.view"
+                >
+                  <OwnershipSurveyPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/documents"
+              element={
+                <ProtectedPage
+                  permission="documents.view"
+                >
+                  <DocumentsPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/litigation"
+              element={
+                <ProtectedPage
+                  permission="workflow.view"
+                >
+                  <LitigationPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/compensation"
+              element={
+                <ProtectedPage
+                  permission="workflow.view"
+                >
+                  <CompensationPage />
+                </ProtectedPage>
+              }
+            />
+
+            <Route
+              path="/rehabilitation"
+              element={
+                <ProtectedPage
+                  permission="workflow.view"
+                >
+                  <RehabilitationPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* ACTION CENTRE */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/actions"
+              element={
+                <ProtectedPage
+                  permission="actions.view"
+                >
+                  <ActionPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* DELAY INTELLIGENCE */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/intelligence"
+              element={
+                <ProtectedPage
+                  permission="risk.view"
+                >
+                  <IntelligencePage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* DIGITAL TWIN */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/digital-twin"
+              element={
+                <ProtectedPage
+                  permission="simulation.view"
+                >
+                  <DigitalTwinPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* INTERVENTION SIMULATOR */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/simulator"
+              element={
+                <ProtectedPage
+                  permission="simulation.view"
+                >
+                  <SimulatorPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* REPORTS */}
+            {/* ===================================================== */}
+
+            <Route
+              path="/reports"
+              element={
+                <ProtectedPage
+                  permission="reports.view"
+                >
+                  <ReportsPage />
+                </ProtectedPage>
+              }
+            />
+
+
+            {/* ===================================================== */}
+            {/* UNKNOWN ROUTE */}
+            {/* ===================================================== */}
+
+            <Route
+              path="*"
+              element={
                 <Navigate
-                  to="/projects/demo"
+                  to="/dashboard"
                   replace
                 />
-              </ProtectedRoute>
-            }
-          />
+              }
+            />
 
-          <Route
-            path="/projects/:projectId"
-            element={
-              <ProtectedRoute
-                permission="projects.view"
-              >
-                <ProjectLensPage />
-              </ProtectedRoute>
-            }
-          />
+          </Routes>
 
+        </FlashProvider>
 
-          {/* ========================= */}
-          {/* ACQUISITION WORKFLOW */}
-          {/* ========================= */}
-
-          <Route
-            path="/parcels"
-            element={
-              <ProtectedRoute
-                permission="workflow.view"
-              >
-                <ParcelsPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/ownership-survey"
-            element={
-              <ProtectedRoute
-                permission="workflow.view"
-              >
-                <OwnershipSurveyPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/documents"
-            element={
-              <ProtectedRoute
-                permission="documents.view"
-              >
-                <DocumentsPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/litigation"
-            element={
-              <ProtectedRoute
-                permission="workflow.view"
-              >
-                <LitigationPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/compensation"
-            element={
-              <ProtectedRoute
-                permission="workflow.view"
-              >
-                <CompensationPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/rehabilitation"
-            element={
-              <ProtectedRoute
-                permission="workflow.view"
-              >
-                <RehabilitationPage />
-              </ProtectedRoute>
-            }
-          />
-
-
-          {/* ========================= */}
-          {/* ACTION CENTRE */}
-          {/* ========================= */}
-
-          <Route
-            path="/actions"
-            element={
-              <ProtectedRoute
-                permission="actions.view"
-              >
-                <ActionPage />
-              </ProtectedRoute>
-            }
-          />
-
-
-          {/* ========================= */}
-          {/* DELAY INTELLIGENCE */}
-          {/* ========================= */}
-
-          <Route
-            path="/intelligence"
-            element={
-              <ProtectedRoute
-                permission="risk.view"
-              >
-                <IntelligencePage />
-              </ProtectedRoute>
-            }
-          />
-
-
-          {/* ========================= */}
-          {/* DIGITAL TWIN */}
-          {/* ========================= */}
-
-          <Route
-            path="/simulator"
-            element={
-              <ProtectedRoute
-                permission="simulation.view"
-              >
-                <SimulatorPage />
-              </ProtectedRoute>
-            }
-          />
-
-
-          {/* ========================= */}
-          {/* REPORTS */}
-          {/* ========================= */}
-
-          <Route
-            path="/reports"
-            element={
-              <ProtectedRoute
-                permission="reports.view"
-              >
-                <ReportsPage />
-              </ProtectedRoute>
-            }
-          />
-
-
-          {/* ========================= */}
-          {/* UNKNOWN ROUTE */}
-          {/* ========================= */}
-
-          <Route
-            path="*"
-            element={
-              <Navigate
-                to="/"
-                replace
-              />
-            }
-          />
-
-        </Routes>
       </AuthProvider>
     </BrowserRouter>
   );

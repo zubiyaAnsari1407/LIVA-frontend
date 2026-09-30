@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
-  ArrowLeft,
   ArrowRight,
   Bell,
   CalendarDays,
@@ -17,6 +16,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
+import { useFlash } from "../context/FlashContext";
 
 import {
   workflowRequest,
@@ -42,6 +42,7 @@ type Priority = (typeof PRIORITIES)[number]
 type Project = {
   id: string
   name: string
+  isDemo?: boolean
 }
 
 type Task = {
@@ -144,10 +145,23 @@ function toPayload(draft: Draft) {
   }
 }
 
+function normalizeLivaProject(value: unknown): Project | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  if (typeof item.projectId !== 'string' || typeof item.projectName !== 'string') return null
+  return { id: item.projectId, name: item.projectName, isDemo: item.isDemo === true }
+}
+
 export default function ActionPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const {
     can,
   } = useAuth()
+
+  const {
+    success: flashSuccess,
+    error: flashError,
+  } = useFlash()
 
   const canManageActions =
     can('actions.manage')
@@ -171,13 +185,16 @@ export default function ActionPage() {
   const [tab, setTab] = useState<'tasks' | 'alerts'>('tasks')
   const [view, setView] = useState<'list' | 'board'>('list')
   const [query, setQuery] = useState('')
-  const [project, setProject] = useState('')
+  const [project, setProject] = useState(() => searchParams.get('projectId') ?? '')
   const [priority, setPriority] = useState('')
   const [status, setStatus] = useState('')
 
   const [selected, setSelected] = useState<Task | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [draft, setDraft] = useState<Draft>({ ...emptyDraft })
+  const [draft, setDraft] = useState<Draft>(() => ({
+    ...emptyDraft,
+    projectId: searchParams.get('projectId') ?? '',
+  }))
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -226,12 +243,16 @@ export default function ActionPage() {
     setProjectLoading(true)
     setProjectError('')
 
-    workflowRequest<{ items: Project[] }>('/api/projects', {
-      signal: controller.signal,
-    })
-      .then((data) => {
+    Promise.all([
+      workflowRequest<{ items: Project[] }>('/api/projects', { signal: controller.signal }),
+      workflowRequest<unknown>('/api/liva/projects', { signal: controller.signal }),
+    ])
+      .then(([data, livaData]) => {
         if (!controller.signal.aborted) {
-          setProjects(data.items)
+          const livaItems = Array.isArray(livaData)
+            ? livaData.map(normalizeLivaProject).filter((item): item is Project => item !== null)
+            : []
+          setProjects([...data.items, ...livaItems].filter((item, index, all) => all.findIndex((other) => other.id === item.id) === index))
         }
       })
       .catch((error) => {
@@ -280,10 +301,9 @@ export default function ActionPage() {
   const hasFilters = Boolean(query || project || priority || status)
   const busy = saving || updatingId !== null
   const summaryAvailable = !loading && !loadError
-
   function clearFilters() {
     setQuery('')
-    setProject('')
+    setProject(searchParams.get('projectId') ?? '')
     setPriority('')
     setStatus('')
     setSkip(0)
@@ -299,7 +319,12 @@ export default function ActionPage() {
     setDraft((current) => ({
       ...current,
       [key]: value,
-      ...(key === 'projectId' ? { parcelId: '' } : {}),
+      ...(key === 'projectId'
+        ? {
+            parcelId: '',
+            isDemo: projects.find((item) => item.id === value)?.isDemo ?? !(typeof value === 'string' && value.startsWith('LIVA-PRJ-')),
+          }
+        : {}),
     }))
   }
 
@@ -321,12 +346,12 @@ function openCreate() {
 
   setEditingId(null)
 
+  const selectedProjectId = project || projects[0]?.id || ''
+  const selectedProject = projects.find((item) => item.id === selectedProjectId)
   setDraft({
     ...emptyDraft,
-    projectId:
-      project ||
-      projects[0]?.id ||
-      '',
+    projectId: selectedProjectId,
+    isDemo: selectedProject?.isDemo ?? !selectedProjectId.startsWith('LIVA-PRJ-'),
   })
 
   setDirty(false)
@@ -416,14 +441,23 @@ async function saveTask(
           : 'Task created and saved to the database.',
       )
 
+      flashSuccess(
+  editingId
+    ? "Task updated successfully."
+    : "Task created successfully.",
+);
+
       setDirty(false)
       setTab('tasks')
       clearFilters()
       createDialog.current?.close()
       setReload((value) => value + 1)
     } catch (error) {
-      setFormError(workflowError(error))
-    } finally {
+      const message = workflowError(error)
+      setFormError(message)
+      flashError(message)
+    }
+     finally {
       saveLock.current = false
       setSaving(false)
     }
@@ -472,8 +506,12 @@ async function saveTask(
 
       applySavedTask(saved)
       setNotice('Task status saved to the database.')
+      flashSuccess("Task status updated successfully.");
     } catch (error) {
-      setStatusError(workflowError(error))
+      const message = workflowError(error)
+      setStatusError(message)
+      flashError(message)
+
     } finally {
       statusLock.current = false
       setUpdatingId(null)
@@ -618,26 +656,6 @@ async function saveTask(
         Skip to Action Centre
       </a>
 
-      <header className="ac-header">
-        <Link to="/" className="ac-brand">
-          Liva<span>.</span>
-        </Link>
-
-        <nav aria-label="Workspace navigation">
-          <Link to="/dashboard">Overview</Link>
-          <Link to="/projects">Projects</Link>
-          <Link to="/compensation">Compensation</Link>
-          <Link to="/rehabilitation">R&R</Link>
-          <Link to="/actions" aria-current="page">
-            Action Centre
-          </Link>
-        </nav>
-
-        <Link to="/dashboard" className="ac-back">
-          <ArrowLeft size={16} aria-hidden="true" />
-          Dashboard
-        </Link>
-      </header>
 
       <main id="ac-main" className="ac-main">
         <div className="ac-breadcrumb">
@@ -675,11 +693,12 @@ async function saveTask(
             Create task
           </button>
         </section>
+        <br/><br/>
 
-        <p className="ac-preview">
+        {/* <p className="ac-preview">
           Database-backed tasks · Includes demo records ·
           Officer assignments do not send notifications
-        </p>
+        </p> */}
 
         <button
           type="button"
@@ -714,11 +733,11 @@ async function saveTask(
         {notice && (
           <p className="ac-api-success" role="status">{notice}</p>
         )}
-
-        <p className="ac-api-note">
+        <br/><br/>
+        {/* <p className="ac-api-note">
           Counts and overdue alerts below cover the currently loaded
           page of up to 100 tasks. Dashboard summary counts all saved tasks.
-        </p>
+        </p> */}
 
         <section className="ac-stats" aria-label="Loaded task summary">
           {[
@@ -799,31 +818,43 @@ async function saveTask(
               </button>
             </div>
 
-            {tab === 'tasks' && (
-              <div
-                className="ac-view-switch"
-                role="group"
-                aria-label="Task view"
+            <div className="ac-toolbar-actions">
+              <button
+                type="button"
+                className="ac-toolbar-create"
+                disabled={busy || projectLoading || !!projectError || !projects.length}
+                onClick={openCreate}
               >
-                <button
-                  type="button"
-                  aria-pressed={view === 'list'}
-                  onClick={() => setView('list')}
-                >
-                  <List size={16} aria-hidden="true" />
-                  List
-                </button>
+                <Plus size={16} aria-hidden="true" />
+                Create task
+              </button>
 
-                <button
-                  type="button"
-                  aria-pressed={view === 'board'}
-                  onClick={() => setView('board')}
+              {tab === 'tasks' && (
+                <div
+                  className="ac-view-switch"
+                  role="group"
+                  aria-label="Task view"
                 >
-                  <LayoutGrid size={16} aria-hidden="true" />
-                  Board
-                </button>
-              </div>
-            )}
+                  <button
+                    type="button"
+                    aria-pressed={view === 'list'}
+                    onClick={() => setView('list')}
+                  >
+                    <List size={16} aria-hidden="true" />
+                    List
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-pressed={view === 'board'}
+                    onClick={() => setView('board')}
+                  >
+                    <LayoutGrid size={16} aria-hidden="true" />
+                    Board
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="ac-filters">
@@ -843,7 +874,12 @@ async function saveTask(
               value={project}
               disabled={busy}
               onChange={(event) => {
-                setProject(event.target.value)
+                const projectId = event.target.value
+                setProject(projectId)
+                const next = new URLSearchParams(searchParams)
+                if (projectId) next.set('projectId', projectId)
+                else next.delete('projectId')
+                setSearchParams(next, { replace: true })
                 setSkip(0)
               }}
             >
@@ -1226,34 +1262,10 @@ async function saveTask(
                   }
                 >
                   <option value="demo">Demo — illustrative</option>
-                  <option value="source">Source-backed record</option>
+                  <option value="source">{draft.projectId.startsWith('LIVA-PRJ-') ? 'LIVA workflow record' : 'Source-backed record'}</option>
                 </select>
               </label>
 
-              <label>
-                Source name {!draft.isDemo && '*'}
-                <input
-                  required={!draft.isDemo}
-                  maxLength={200}
-                  value={draft.sourceName}
-                  onChange={(event) =>
-                    changeDraft('sourceName', event.target.value)
-                  }
-                />
-              </label>
-
-              <label>
-                Source URL {!draft.isDemo && '*'}
-                <input
-                  type="url"
-                  required={!draft.isDemo}
-                  value={draft.sourceUrl}
-                  placeholder="https://..."
-                  onChange={(event) =>
-                    changeDraft('sourceUrl', event.target.value)
-                  }
-                />
-              </label>
             </div>
 
             {draft.parcelId && (
@@ -1276,11 +1288,7 @@ async function saveTask(
               />
             </label>
 
-            <p className="ac-api-note">
-              Project selector shows the latest 100 projects.
-              New tasks created here are project-level tasks.
-              Adding a source does not independently verify a task.
-            </p>
+            
 
             {formError && (
               <p className="ac-warning" role="alert">{formError}</p>
@@ -1295,11 +1303,13 @@ async function saveTask(
                 Cancel
               </button>
 
-              {/* <button
+              <button
                 type="submit"
                 className="ac-primary"
                 disabled={
                   saving ||
+                  projectLoading ||
+                  !!projectError ||
                   draft.title.trim().length < 3 ||
                   !draft.projectId ||
                   draft.officer.trim().length < 2
@@ -1311,30 +1321,7 @@ async function saveTask(
                   : editingId
                     ? 'Save changes'
                     : 'Create task'}
-              </button> */}
-
-
-
-              {canManageActions && (
-  <button
-    type="button"
-    className="ac-primary"
-    disabled={
-      busy ||
-      projectLoading ||
-      !!projectError ||
-      !projects.length
-    }
-    onClick={openCreate}
-  >
-    <Plus
-      size={18}
-      aria-hidden="true"
-    />
-
-    Create task
-  </button>
-)}
+              </button>
             </div>
           </fieldset>
         </form>

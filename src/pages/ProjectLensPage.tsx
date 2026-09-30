@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   AlertTriangle,
+  Activity,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -19,6 +20,8 @@ import {
 
 import '../styles/project-lens.css'
 import ProjectForm from '../components/ProjectForm'
+import LivaProjectForm from '../components/LivaProjectForm'
+import LivaAssistant from '../components/ai/LivaAssistant'
 import {
   rupees,
   workflowError,
@@ -50,6 +53,12 @@ latitude?: number | null
 longitude?: number | null
 locationDisplayName?: string | null
 locationSource?: string | null
+  surveyNumber?: string
+  village?: string
+  area?: string
+  ownerName?: string
+  pincode?: string
+isLivaProject?: boolean
 }
 type LinkedParcel = {
   id: string
@@ -119,40 +128,94 @@ const tabs: { id: Tab; label: string }[] = [
 
 const linkedModules = [
   {
-    title: 'Documents & Records',
-    description: 'Review supporting files and verification records.',
-    to: '/documents',
-    icon: FileText,
+    title: 'Parcel Registry',
+    description: 'Register project parcels and follow each parcel through survey and acquisition.',
+    to: '/parcels',
+    icon: Layers3,
+    image: '/images/liva-land.png',
+    imageAlt: 'Land parcels connected to the selected project',
+    metric: 'workspace',
+  },
+  {
+    title: 'Ownership & Survey',
+    description: 'Verify ownership records and maintain survey review details.',
+    to: '/ownership-survey',
+    icon: CheckCircle2,
     image: '/images/liva-documents.png',
-    imageAlt: 'Illustrative document and land-record workspace',
-    metric: 'documents',
+    imageAlt: 'Ownership and survey review records',
+    metric: 'workspace',
   },
   {
-    title: 'Court & Litigation',
-    description: 'Review case records and legal follow-ups.',
-    to: '/litigation',
-    icon: Scale,
-    image: '/images/liva-litigation.png',
-    imageAlt: 'Illustrative court and litigation workspace',
-    metric: 'cases',
-  },
-  {
-    title: 'Compensation & R&R',
-    description: 'Review payment and rehabilitation milestones.',
+    title: 'Compensation',
+    description: 'Record approved amounts, payments and remaining balances.',
     to: '/compensation',
     icon: IndianRupee,
     image: '/images/liva-compensation.png',
-    imageAlt: 'Illustrative compensation and rehabilitation workspace',
-    metric: 'compensation',
+    imageAlt: 'Project compensation workspace',
+    metric: 'workspace',
+  },
+  {
+    title: 'Rehabilitation & Resettlement',
+    description: 'Track project-linked rehabilitation milestones and delivery status.',
+    to: '/rehabilitation',
+    icon: Building2,
+    image: '/images/liva-team.png',
+    imageAlt: 'Rehabilitation and resettlement workspace',
+    metric: 'workspace',
   },
   {
     title: 'Action Centre',
-    description: 'Create follow-ups and track responsibilities.',
+    description: 'Assign follow-ups, owners and due dates for this project.',
     to: '/actions',
     icon: ClipboardList,
     image: '/images/liva-team.png',
     imageAlt: 'Illustrative project coordination and action workspace',
-    metric: 'actions',
+    metric: 'workspace',
+  },
+  {
+    title: 'Documents & Records',
+    description: 'Find the land, survey, acquisition and compensation documents for this project.',
+    to: '/documents',
+    icon: FileText,
+    image: '/images/liva-documents.png',
+    imageAlt: 'Project documents and records',
+    metric: 'workspace',
+  },
+  {
+    title: 'Risk Intelligence',
+    description: 'Review a saved risk assessment, its factors and recommended actions.',
+    to: '/intelligence',
+    icon: Target,
+    image: '/images/liva-pp.png',
+    imageAlt: 'Project risk intelligence workspace',
+    metric: 'insight',
+  },
+  {
+    title: 'Digital Twin',
+    description: 'Explore the current project state from its saved workflow records.',
+    to: '/digital-twin',
+    icon: Circle,
+    image: '/images/liva-land.png',
+    imageAlt: 'Project digital twin workspace',
+    metric: 'insight',
+  },
+  {
+    title: 'Intervention Simulator',
+    description: 'Run a what-if scenario and compare its estimated risk with the baseline.',
+    to: '/simulator',
+    icon: Activity,
+    image: '/images/liva-team.png',
+    imageAlt: 'Project intervention simulator',
+    metric: 'insight',
+  },
+  {
+    title: 'GIS Map',
+    description: 'Open the map focused on this project and its available spatial records.',
+    to: '/dashboard',
+    icon: MapPin,
+    image: '/images/liva-land.png',
+    imageAlt: 'GIS view of the selected project',
+    metric: 'map',
   },
 ]
 
@@ -176,6 +239,39 @@ function isProject(value: unknown): value is Project {
       )
     )
   )
+}
+
+function normalizeLivaProject(value: unknown): Project | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  if (typeof item.projectId !== 'string' || typeof item.projectName !== 'string') return null
+
+  const village = typeof item.village === 'string' ? item.village : ''
+  const surveyNumber = typeof item.surveyNumber === 'string' ? item.surveyNumber : ''
+  const district = typeof item.district === 'string' ? item.district : 'Not available'
+  const state = typeof item.state === 'string' ? item.state : 'Maharashtra'
+
+  return {
+    id: item.projectId,
+    name: item.projectName,
+    state,
+    district,
+    stage: typeof item.status === 'string' ? item.status.replaceAll('_', ' ') : 'Not specified',
+    progress: typeof item.progress === 'number' ? item.progress : null,
+    description: `LIVA project · Survey ${surveyNumber || 'not recorded'} · ${village || 'location not recorded'}`,
+    isDemo: item.isDemo === true,
+    isLivaProject: true,
+    surveyNumber,
+    village,
+    area: typeof item.area === 'string' ? item.area : undefined,
+    ownerName: typeof item.ownerName === 'string' ? item.ownerName : undefined,
+    pincode: typeof item.pincode === 'string' ? item.pincode : undefined,
+    latitude: typeof item.latitude === 'number' ? item.latitude : null,
+    longitude: typeof item.longitude === 'number' ? item.longitude : null,
+    locationDisplayName: [village, district, state].filter(Boolean).join(', '),
+    sourceName: item.isDemo === true ? 'LIVA demo project' : 'LIVA project registry',
+    sourceRecordId: item.projectId,
+  }
 }
 
 
@@ -282,7 +378,8 @@ useEffect(() => {
     return
   }
 
-  if (!/^[a-fA-F0-9]{24}$/.test(projectId)) {
+  const isLivaProject = projectId.startsWith('LIVA-PRJ-')
+  if (!isLivaProject && !/^[a-fA-F0-9]{24}$/.test(projectId)) {
     setParcelsLoading(false)
     return
   }
@@ -400,7 +497,8 @@ function changeParcelPage(nextPage: number) {
   useEffect(() => {
     if (projectId === 'demo') return
 
-    if (!/^[a-fA-F0-9]{24}$/.test(projectId)) {
+    const isLivaProject = projectId.startsWith('LIVA-PRJ-')
+    if (!isLivaProject && !/^[a-fA-F0-9]{24}$/.test(projectId)) {
       setLoadState({
         id: projectId,
         status: 'error',
@@ -422,7 +520,7 @@ function changeParcelPage(nextPage: number) {
         ).replace(/\/+$/, '')
 
         const response = await fetch(
-          `${baseUrl}/api/projects/${encodeURIComponent(projectId)}`,
+          `${baseUrl}${isLivaProject ? '/api/liva/projects' : '/api/projects'}/${encodeURIComponent(projectId)}`,
           { signal: controller.signal },
         )
 
@@ -447,7 +545,8 @@ function changeParcelPage(nextPage: number) {
           )
         }
 
-        const data: unknown = await response.json()
+        const rawData: unknown = await response.json()
+        const data = isLivaProject ? normalizeLivaProject(rawData) : rawData
 
         if (
           !isProject(data) ||
@@ -491,7 +590,7 @@ function changeParcelPage(nextPage: number) {
   const isStandaloneDemo = projectId === 'demo'
 
   useEffect(() => {
-    if (!project || !project.isDemo || isStandaloneDemo) {
+    if (!project || isStandaloneDemo) {
       setTimelineSummary(null)
       setTimelineError('')
       setTimelineLoading(false)
@@ -894,7 +993,27 @@ function changeParcelPage(nextPage: number) {
                     <div>
                       <p className="pl-eyebrow">THE BIG PICTURE</p>
                       <h2>Project overview</h2>
-                      {!isStandaloneDemo && (
+                      {!isStandaloneDemo && project.isLivaProject && (
+                        <div style={{ marginTop: 14 }}>
+                          <LivaProjectForm
+                            project={{
+                              id: project.id,
+                              name: project.name,
+                              surveyNumber: project.surveyNumber ?? '',
+                              ownerName: project.ownerName,
+                              village: project.village ?? '',
+                              district: project.district,
+                              state: project.state,
+                              pincode: project.pincode,
+                              area: project.area,
+                              stage: project.stage,
+                              progress: project.progress,
+                            }}
+                            onSaved={retry}
+                          />
+                        </div>
+                      )}
+                      {!isStandaloneDemo && !project.isLivaProject && (
   <div style={{ marginTop: 14 }}>
     <ProjectForm project={project} onSaved={retry} />
   </div>
@@ -977,15 +1096,15 @@ function changeParcelPage(nextPage: number) {
 
             .pl-linked-grid {
               display: grid;
-              grid-template-columns: repeat(4, minmax(0, 1fr));
-              gap: 16px;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 22px;
             }
 
             .pl-module.pl-module-visual {
               position: relative;
               display: flex;
               min-width: 0;
-              min-height: 320px;
+              min-height: 350px;
               flex-direction: column;
               align-items: stretch;
               overflow: hidden;
@@ -1069,7 +1188,7 @@ function changeParcelPage(nextPage: number) {
 
             .pl-module-body {
               display: flex;
-              min-height: 188px;
+              min-height: 205px;
               flex: 1;
               flex-direction: column;
               padding: 18px 18px 17px;
@@ -1091,7 +1210,7 @@ function changeParcelPage(nextPage: number) {
               border-radius: 999px;
               background: #f7f9f5;
               color: #65776d;
-              font-size: 9px;
+              font-size: 11px;
               font-weight: 750;
               letter-spacing: .03em;
             }
@@ -1105,15 +1224,15 @@ function changeParcelPage(nextPage: number) {
             .pl-module.pl-module-visual h3 {
               margin: 10px 0 0;
               color: #173f35;
-              font-size: 15px;
-              line-height: 1.35;
+              font-size: 19px;
+              line-height: 1.4;
             }
 
             .pl-module.pl-module-visual p {
               margin: 8px 0 0;
               color: #617169;
-              font-size: 11px;
-              line-height: 1.55;
+              font-size: 14px;
+              line-height: 1.65;
             }
 
             .pl-module.pl-module-visual .pl-module-link {
@@ -1123,7 +1242,7 @@ function changeParcelPage(nextPage: number) {
               margin-top: auto;
               padding-top: 18px;
               color: #3f5f42;
-              font-size: 11px;
+              font-size: 13px;
               font-weight: 750;
             }
 
@@ -1162,7 +1281,7 @@ function changeParcelPage(nextPage: number) {
                 <p className="pl-eyebrow">CONNECTED WORKSPACES</p>
                 <h2>Continue the review.</h2>
               </div>
-              <p>Open a module to review its records.</p>
+              <p>Choose a workspace. Each one stays linked to {project.id}.</p>
             </div>
 
             <div className="pl-linked-grid">
@@ -1176,7 +1295,11 @@ function changeParcelPage(nextPage: number) {
                   imageAlt,
                   metric,
                 }) => {
-                  let metricText = 'Open workspace'
+                  let metricText = metric === 'insight'
+                    ? 'Saved data when available'
+                    : metric === 'map'
+                      ? 'Project-focused GIS view'
+                      : 'Records for this project'
 
                   if (project.isDemo && !isStandaloneDemo && timelineSummary) {
                     if (metric === 'documents') {
@@ -1202,10 +1325,14 @@ function changeParcelPage(nextPage: number) {
                     }
                   }
 
+                  const moduleUrl = metric === 'map'
+                    ? `/dashboard?gisProject=${encodeURIComponent(projectId)}#dashboard-map`
+                    : `${to}?projectId=${encodeURIComponent(projectId)}`
+
                   return (
                     <Link
                       className="pl-module pl-module-visual"
-                      to={to}
+                      to={moduleUrl}
                       key={title}
                     >
                       <div className="pl-module-media">
@@ -1254,9 +1381,8 @@ function changeParcelPage(nextPage: number) {
               )}
             </div>
 
-            <p className="pl-small" style={{ marginTop: 12 }}>
-              These links open full workspaces. Project-specific counts are
-              shown for the saved demo where connected records are available.
+            <p className="pl-small" style={{ marginTop: 18, fontSize: 13, lineHeight: 1.6 }}>
+              Project ID is carried into each workspace. Risk, Digital Twin and simulation results appear only when saved project data is available.
             </p>
           </section>
         </section>
@@ -2083,11 +2209,12 @@ function changeParcelPage(nextPage: number) {
           </>
         )}
       </main>
-
       <footer className="pl-footer">
         <strong>Liva</strong>
         <span>Better land decisions. Stronger communities.</span>
       </footer>
+
+      <LivaAssistant projectId={projectId} />
     </div>
   )
 }

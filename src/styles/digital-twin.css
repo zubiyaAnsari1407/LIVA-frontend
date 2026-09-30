@@ -1,0 +1,1429 @@
+/* =========================================================
+   LIVA DIGITAL TWIN
+   Professional Government / SaaS workspace
+   ========================================================= */
+
+.dt-page-shell {
+  min-height: 100%;
+  width: 100%;
+  padding: 28px 32px 48px;
+  background:
+    linear-gradient(
+      180deg,
+      #f4f7f4 0%,
+      #f8faf8 38%,
+      #ffffff 100%
+    );
+  color: #17261f;
+  box-sizing: border-box;
+}
+
+.dt-page-shell *,
+.dt-page-shell *::before,
+.dt-page-shell *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.dt-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: 230px;
+  padding: 34px 38px;
+  margin-bottom: 22px;
+  overflow: hidden;
+  border: 1px solid #183d33;
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 78% 20%,
+      rgba(104, 151, 134, 0.24),
+      transparent 30%
+    ),
+    linear-gradient(
+      120deg,
+      #102f28 0%,
+      #173d33 48%,
+      #245344 100%
+    );
+  box-shadow:
+    0 14px 34px rgba(21, 52, 43, 0.14);
+}
+
+.dt-hero::after {
+  content: '';
+  position: absolute;
+  right: -90px;
+  bottom: -110px;
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 45px rgba(255, 255, 255, 0.025),
+    0 0 0 90px rgba(255, 255, 255, 0.018);
+}
+
+.dt-hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 690px;
+}
+
+.dt-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: #b8d0c6;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.dt-hero-kicker-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dt-hero h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  font-weight: 760;
+}
+
+.dt-hero-copy > p {
+  max-width: 650px;
+  margin: 14px 0 0;
+  color: #d5e4de;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.dt-hero-controls {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(240px, 310px) auto;
+  align-items: end;
+  gap: 10px;
+  min-width: 360px;
+}
+
+.dt-project-selector-label {
+  grid-column: 1 / -1;
+  color: #b8d0c6;
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dt-project-selector {
+  width: 100%;
+  min-height: 43px;
+  padding: 0 38px 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  outline: none;
+  color: #ffffff;
+  background:
+    rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dt-project-selector:focus {
+  border-color: #a9cabc;
+  box-shadow:
+    0 0 0 3px rgba(169, 202, 188, 0.15);
+}
+
+.dt-project-selector option {
+  color: #17261f;
+  background: #ffffff;
+}
+
+.dt-refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.dt-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.17);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dt-refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dt-spin {
+  animation: dt-spin 900ms linear infinite;
+}
+
+@keyframes dt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   LOADING / ERROR
+   ========================================================= */
+
+.dt-loading-bar {
+  height: 3px;
+  margin: -22px 0 20px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #dfe8e3;
+}
+
+.dt-loading-bar span {
+  display: block;
+  width: 35%;
+  height: 100%;
+  border-radius: inherit;
+  background: #2b6a56;
+  animation: dt-loading 1.1s ease-in-out infinite;
+}
+
+@keyframes dt-loading {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.dt-loading-card,
+.dt-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  padding: 40px;
+  border: 1px solid #dfe7e2;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.dt-loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 15px;
+  border: 1px solid #cbdad3;
+  border-radius: 12px;
+  color: #235743;
+  background: #f2f7f4;
+}
+
+.dt-loading-card h2,
+.dt-empty-card h2 {
+  margin: 0;
+  color: #17362c;
+  font-size: 19px;
+}
+
+.dt-loading-card p,
+.dt-empty-card p {
+  max-width: 530px;
+  margin: 9px 0 0;
+  color: #6c7b74;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dt-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #ead5bd;
+  border-radius: 12px;
+  color: #5c4129;
+  background: #fff8ef;
+}
+
+.dt-error-banner > svg {
+  flex: 0 0 auto;
+}
+
+.dt-error-banner > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.dt-error-banner strong {
+  font-size: 13px;
+}
+
+.dt-error-banner span {
+  color: #7d6855;
+  font-size: 12px;
+}
+
+.dt-error-banner button {
+  border: 0;
+  color: #315b4a;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.dt-card {
+  padding: 25px;
+  border: 1px solid #dfe7e2;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow:
+    0 5px 20px rgba(31, 53, 44, 0.045);
+}
+
+.dt-current-state {
+  margin-bottom: 20px;
+}
+
+.dt-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.dt-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #557468;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.dt-section-heading h2 {
+  margin: 0;
+  color: #1a352b;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.dt-section-heading p {
+  max-width: 700px;
+  margin: 7px 0 0;
+  color: #708079;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.dt-state-badge,
+.dt-workflow-position,
+.dt-update-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border: 1px solid #d9e5df;
+  border-radius: 8px;
+  color: #486a5c;
+  background: #f4f8f5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dt-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3b8568;
+  box-shadow:
+    0 0 0 3px rgba(59, 133, 104, 0.12);
+}
+
+/* =========================================================
+   CURRENT STATE
+   ========================================================= */
+
+.dt-current-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1.7fr)
+    minmax(150px, 0.8fr)
+    minmax(190px, 1fr)
+    minmax(150px, 0.8fr);
+  gap: 12px;
+}
+
+.dt-project-primary,
+.dt-state-metric {
+  min-height: 112px;
+  padding: 17px;
+  border: 1px solid #e4ebe7;
+  border-radius: 11px;
+  background: #fafcfb;
+}
+
+.dt-project-primary {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dt-project-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: #275c49;
+  background: #e7f0eb;
+}
+
+.dt-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #77877f;
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.dt-project-primary h3 {
+  margin: 0;
+  color: #203a30;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.dt-location {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 7px;
+  color: #718078;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.dt-state-metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dt-state-metric strong {
+  color: #21473a;
+  font-size: 16px;
+  font-weight: 760;
+}
+
+.dt-progress-track {
+  width: 100%;
+  height: 5px;
+  margin-top: 11px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e1e9e4;
+}
+
+.dt-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #34765f;
+}
+
+.dt-project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 13px;
+  padding-top: 14px;
+  border-top: 1px solid #edf1ef;
+}
+
+.dt-project-meta > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #75827c;
+  font-size: 11px;
+}
+
+.dt-project-meta svg {
+  color: #668477;
+}
+
+.dt-project-meta strong {
+  color: #40584d;
+  font-weight: 700;
+}
+
+/* =========================================================
+   TWO COLUMN
+   ========================================================= */
+
+.dt-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* =========================================================
+   LAND PARCEL
+   ========================================================= */
+
+.dt-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 16px;
+  border: 1px solid #e5ebe7;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.dt-summary-strip > div {
+  padding: 13px 15px;
+  border-right: 1px solid #e5ebe7;
+  background: #fafcfb;
+}
+
+.dt-summary-strip > div:last-child {
+  border-right: 0;
+}
+
+.dt-summary-strip span {
+  display: block;
+  color: #78877f;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dt-summary-strip strong {
+  display: block;
+  margin-top: 5px;
+  color: #23493b;
+  font-size: 20px;
+}
+
+.dt-metric-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dt-metric-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf1ef;
+}
+
+.dt-metric-row:last-child {
+  border-bottom: 0;
+}
+
+.dt-metric-icon,
+.dt-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.dt-metric-icon.neutral,
+.dt-status-icon.neutral {
+  color: #4c6b5e;
+  background: #edf4f0;
+}
+
+.dt-metric-icon.success,
+.dt-status-icon.success {
+  color: #357158;
+  background: #eaf5ef;
+}
+
+.dt-metric-icon.warning,
+.dt-status-icon.warning {
+  color: #8a6940;
+  background: #fbf2e4;
+}
+
+.dt-metric-icon.danger,
+.dt-status-icon.danger {
+  color: #8a514c;
+  background: #f9ecea;
+}
+
+.dt-metric-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dt-metric-copy strong {
+  color: #31483e;
+  font-size: 12px;
+}
+
+.dt-metric-copy span {
+  color: #7b8982;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.dt-metric-value {
+  font-size: 17px;
+  font-weight: 780;
+}
+
+.dt-metric-value.neutral {
+  color: #31594b;
+}
+
+.dt-metric-value.success {
+  color: #39765a;
+}
+
+.dt-metric-value.warning {
+  color: #87653e;
+}
+
+.dt-metric-value.danger {
+  color: #914f49;
+}
+
+.dt-card-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #edf1ef;
+  color: #829088;
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   LEGAL / OPERATIONAL
+   ========================================================= */
+
+.dt-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.dt-status-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 105px;
+  padding: 13px;
+  border: 1px solid #e8eeeb;
+  border-radius: 10px;
+  background: #fbfcfb;
+}
+
+.dt-status-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dt-status-copy > span {
+  color: #697970;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.dt-status-copy strong {
+  margin-top: 3px;
+  color: #294a3d;
+  font-size: 19px;
+}
+
+.dt-status-copy p {
+  margin: 4px 0 0;
+  color: #7c8983;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.dt-operational-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.dt-operational-footer > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  border: 1px solid #e6ece9;
+  border-radius: 9px;
+  background: #f8faf9;
+}
+
+.dt-operational-footer span {
+  color: #75837c;
+  font-size: 10.5px;
+}
+
+.dt-operational-footer strong {
+  color: #365b4c;
+  font-size: 11px;
+}
+
+/* =========================================================
+   WORKFLOW
+   ========================================================= */
+
+.dt-workflow {
+  margin-bottom: 20px;
+}
+
+.dt-workflow-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  padding: 5px 0 0;
+}
+
+.dt-workflow-step {
+  position: relative;
+  min-width: 0;
+  padding-right: 18px;
+}
+
+.dt-workflow-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 39px;
+  height: 39px;
+  margin-bottom: 11px;
+  border: 1px solid #d9e3de;
+  border-radius: 10px;
+  color: #819088;
+  background: #f5f8f6;
+}
+
+.dt-workflow-step.complete
+  .dt-workflow-node {
+  border-color: #bcd6ca;
+  color: #2d7055;
+  background: #e9f4ee;
+}
+
+.dt-workflow-step.current
+  .dt-workflow-node {
+  border-color: #2f6c56;
+  color: #ffffff;
+  background: #2f6c56;
+  box-shadow:
+    0 0 0 4px rgba(47, 108, 86, 0.1);
+}
+
+.dt-workflow-title {
+  display: block;
+  color: #2d493e;
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.dt-workflow-description {
+  display: block;
+  max-width: 170px;
+  margin-top: 5px;
+  color: #7a8881;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.dt-workflow-status {
+  display: inline-block;
+  margin-top: 7px;
+  color: #708079;
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dt-workflow-step.complete
+  .dt-workflow-status {
+  color: #4c806b;
+}
+
+.dt-workflow-step.current
+  .dt-workflow-status {
+  color: #2f6c56;
+}
+
+.dt-workflow-connector {
+  position: absolute;
+  top: 19px;
+  left: 39px;
+  right: 0;
+  height: 1px;
+  background: #dce5e0;
+}
+
+.dt-workflow-step.complete
+  .dt-workflow-connector {
+  background: #9fc5b3;
+}
+
+.dt-workflow-note {
+  margin-top: 22px;
+  padding: 13px 15px;
+  border-left: 3px solid #3e765f;
+  border-radius: 0 8px 8px 0;
+  color: #66766e;
+  background: #f3f8f5;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.dt-workflow-note strong {
+  color: #315b4a;
+}
+
+/* =========================================================
+   CURRENT WORKFLOW SIGNAL
+   ========================================================= */
+
+.dt-signal-card {
+  margin-bottom: 20px;
+}
+
+.dt-primary-signal {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 17px;
+  margin-bottom: 12px;
+  border: 1px solid #e7ddd0;
+  border-radius: 11px;
+  background:
+    linear-gradient(
+      90deg,
+      #fffaf3,
+      #ffffff
+    );
+}
+
+.dt-primary-signal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  color: #8a673e;
+  background: #f8eddc;
+}
+
+.dt-primary-signal span {
+  color: #92795b;
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.dt-primary-signal h3 {
+  margin: 4px 0 0;
+  color: #3c443f;
+  font-size: 15px;
+}
+
+.dt-primary-signal p {
+  margin: 4px 0 0;
+  color: #7b7e78;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.dt-primary-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.dt-primary-count strong {
+  color: #805d36;
+  font-size: 24px;
+}
+
+.dt-primary-count span {
+  color: #8e816e;
+  font-size: 9px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.dt-clear-signal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 17px;
+  margin-bottom: 12px;
+  border: 1px solid #dbe9e2;
+  border-radius: 11px;
+  color: #376b55;
+  background: #f3f9f5;
+}
+
+.dt-clear-signal strong {
+  display: block;
+  color: #315b4a;
+  font-size: 13px;
+}
+
+.dt-clear-signal p {
+  margin: 4px 0 0;
+  color: #718178;
+  font-size: 11px;
+}
+
+.dt-signal-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dt-signal-row {
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr) 40px 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf1ef;
+}
+
+.dt-signal-row:last-child {
+  border-bottom: 0;
+}
+
+.dt-signal-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 31px;
+  border-radius: 8px;
+  color: #65766d;
+  background: #f0f4f2;
+}
+
+.dt-signal-row.attention
+  .dt-signal-row-icon {
+  color: #876640;
+  background: #fbf2e5;
+}
+
+.dt-signal-row-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dt-signal-row-copy strong {
+  color: #40564c;
+  font-size: 11.5px;
+}
+
+.dt-signal-row-copy span {
+  margin-top: 2px;
+  color: #7b8781;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.dt-signal-row-count {
+  text-align: right;
+  color: #3c5d50;
+  font-size: 14px;
+  font-weight: 780;
+}
+
+/* =========================================================
+   RECENT CHANGES
+   ========================================================= */
+
+.dt-change-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.dt-change-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid #e7ece9;
+  border-radius: 10px;
+  background: #fbfcfb;
+}
+
+.dt-change-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  color: #476b5d;
+  background: #edf4f0;
+}
+
+.dt-change-item strong {
+  display: block;
+  color: #365146;
+  font-size: 11.5px;
+}
+
+.dt-change-item p {
+  margin: 4px 0 0;
+  color: #7b8881;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.dt-info-note,
+.dt-location-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 13px;
+  padding: 11px 12px;
+  border: 1px solid #e4ebe7;
+  border-radius: 8px;
+  color: #718078;
+  background: #f8faf9;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.dt-info-note svg,
+.dt-location-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #57776a;
+}
+
+.dt-update-badge {
+  white-space: nowrap;
+}
+
+/* =========================================================
+   MAP / LOCATION
+   ========================================================= */
+
+.dt-map-card {
+  min-height: 100%;
+}
+
+.dt-location-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 150px;
+  padding: 20px;
+  border: 1px solid #dce6e1;
+  border-radius: 12px;
+  background:
+    linear-gradient(
+      135deg,
+      #f2f7f4 0%,
+      #e9f2ed 100%
+    );
+}
+
+.dt-location-panel > svg {
+  flex: 0 0 auto;
+  color: #3f725e;
+}
+
+.dt-location-panel strong {
+  display: block;
+  color: #2e4d40;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.dt-location-panel span {
+  display: block;
+  margin-top: 5px;
+  color: #728179;
+  font-size: 10.5px;
+}
+
+/* =========================================================
+   DATA STATUS
+   ========================================================= */
+
+.dt-data-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 20px;
+  border-color: #d7e4dd;
+  background:
+    linear-gradient(
+      100deg,
+      #f3f8f5,
+      #ffffff
+    );
+}
+
+.dt-data-status-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  max-width: 800px;
+}
+
+.dt-data-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: #356b55;
+  background: #e5f0ea;
+}
+
+.dt-data-status h2 {
+  margin: 0;
+  color: #294b3e;
+  font-size: 16px;
+}
+
+.dt-data-status .dt-eyebrow {
+  margin-bottom: 4px;
+}
+
+.dt-data-status p {
+  margin: 7px 0 0;
+  color: #738078;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.dt-data-status-meta {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 7px 14px;
+  min-width: 190px;
+  padding-left: 20px;
+  border-left: 1px solid #dfe8e3;
+}
+
+.dt-data-status-meta span {
+  color: #849088;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dt-data-status-meta strong {
+  color: #426153;
+  font-size: 10.5px;
+  text-align: right;
+}
+
+/* =========================================================
+   COMPENSATION
+   ========================================================= */
+
+.dt-compensation-card {
+  margin-bottom: 20px;
+}
+
+.dt-financial-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.dt-financial-metric {
+  min-height: 92px;
+  padding: 15px;
+  border: 1px solid #e5ebe8;
+  border-radius: 10px;
+  background: #fafcfb;
+}
+
+.dt-financial-metric span {
+  display: block;
+  color: #78867f;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dt-financial-metric strong {
+  display: block;
+  margin-top: 10px;
+  color: #2f5a49;
+  font-size: 16px;
+  font-weight: 780;
+}
+
+/* =========================================================
+   FOOTNOTE
+   ========================================================= */
+
+.dt-selected-project-footnote {
+  padding: 3px 3px 0;
+  color: #829088;
+  font-size: 10.5px;
+  text-align: right;
+}
+
+.dt-selected-project-footnote strong {
+  color: #48665a;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1180px) {
+  .dt-current-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .dt-project-primary {
+    grid-column: 1 / -1;
+  }
+
+  .dt-financial-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .dt-page-shell {
+    padding: 20px;
+  }
+
+  .dt-hero {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 27px;
+  }
+
+  .dt-hero-controls {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .dt-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-workflow-track {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .dt-workflow-step {
+    display: grid;
+    grid-template-columns: 39px 1fr;
+    column-gap: 12px;
+    padding-right: 0;
+  }
+
+  .dt-workflow-node {
+    grid-row: 1;
+    margin: 0;
+  }
+
+  .dt-workflow-content {
+    grid-column: 2;
+  }
+
+  .dt-workflow-connector {
+    top: 39px;
+    bottom: -12px;
+    left: 19px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+
+  .dt-workflow-step:last-child
+    .dt-workflow-connector {
+    display: none;
+  }
+
+  .dt-data-status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dt-data-status-meta {
+    width: 100%;
+    padding-left: 0;
+    padding-top: 14px;
+    border-top: 1px solid #dfe8e3;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dt-page-shell {
+    padding: 14px;
+  }
+
+  .dt-hero {
+    min-height: auto;
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  .dt-hero h1 {
+    font-size: 31px;
+  }
+
+  .dt-hero-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-project-selector-label {
+    grid-column: auto;
+  }
+
+  .dt-refresh-button {
+    width: 100%;
+  }
+
+  .dt-card {
+    padding: 18px;
+    border-radius: 13px;
+  }
+
+  .dt-section-heading {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dt-current-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-project-primary {
+    grid-column: auto;
+  }
+
+  .dt-summary-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-summary-strip > div {
+    border-right: 0;
+    border-bottom: 1px solid #e5ebe7;
+  }
+
+  .dt-summary-strip > div:last-child {
+    border-bottom: 0;
+  }
+
+  .dt-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-operational-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-primary-signal {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .dt-primary-count {
+    grid-column: 2;
+    align-items: flex-start;
+  }
+
+  .dt-financial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dt-project-meta {
+    flex-direction: column;
+    gap: 9px;
+  }
+}
