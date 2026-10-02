@@ -3,7 +3,8 @@
 LIVA is a web-based Land Acquisition Delay Detection Platform designed to digitize and monitor the land acquisition workflow.
 
 The platform connects landowners, project officers and administrators through a role-based workflow for land registration, document verification, grievance management, delay-risk intelligence, simulation and continuous monitoring.
-
+LIVA:
+https://liva-frontend-git-liva-final-deploy-paradox-02a0.vercel.app/
 ---
 
 ## 1. Project Overview
